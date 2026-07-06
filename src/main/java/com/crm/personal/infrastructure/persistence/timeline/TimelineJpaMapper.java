@@ -5,16 +5,22 @@ import com.crm.personal.domain.timeline.model.MediaAttachment;
 import com.crm.personal.domain.timeline.model.TimelineRecord;
 import com.crm.personal.domain.timeline.model.TimelineRecordId;
 import com.crm.personal.domain.timeline.model.TimelineRecordType;
+import com.crm.personal.infrastructure.filesystem.LocalMediaStorageAdapter;
 import com.crm.personal.infrastructure.persistence.model.Contacto;
 import com.crm.personal.infrastructure.persistence.model.MediaAdjunto;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
 public class TimelineJpaMapper {
+
+    private final LocalMediaStorageAdapter mediaStorage;
+
+    public TimelineJpaMapper(LocalMediaStorageAdapter mediaStorage) {
+        this.mediaStorage = mediaStorage;
+    }
 
     public TimelineRecord toDomain(com.crm.personal.infrastructure.persistence.model.TimelineRecord entity) {
         return new TimelineRecord(
@@ -49,7 +55,7 @@ public class TimelineJpaMapper {
         return new MediaAttachment(
                 entity.getId(),
                 entity.getFilePath(),
-                Path.of(entity.getFilePath()),
+                mediaStorage.resolve(entity.getFilePath()),
                 entity.getNombreArchivo(),
                 entity.getTipoMime(),
                 entity.getDescripcion(),
