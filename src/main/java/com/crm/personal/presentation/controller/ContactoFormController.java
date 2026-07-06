@@ -1,7 +1,9 @@
 package com.crm.personal.presentation.controller;
 
-import com.crm.personal.application.dto.ContactoDTO;
-import com.crm.personal.application.service.ContactoService;
+import com.crm.personal.application.contact.command.CreateContactCommand;
+import com.crm.personal.application.contact.command.UpdateContactCommand;
+import com.crm.personal.application.contact.port.CreateContactUseCase;
+import com.crm.personal.application.contact.port.UpdateContactUseCase;
 import com.crm.personal.application.service.EtiquetaService;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
@@ -36,7 +38,8 @@ public class ContactoFormController {
     @FXML private Button    btnGuardar;
     @FXML private Button    btnCancelar;
 
-    private final ContactoService         contactoService;
+    private final CreateContactUseCase    createContactUseCase;
+    private final UpdateContactUseCase    updateContactUseCase;
     private final EtiquetaService         etiquetaService;
     private final CampoDinamicoRepository campoDinamicoRepository;
 
@@ -47,10 +50,12 @@ public class ContactoFormController {
     /** Callback invocado al guardar correctamente */
     private Runnable onSuccess;
 
-    public ContactoFormController(ContactoService contactoService,
+    public ContactoFormController(CreateContactUseCase createContactUseCase,
+                                  UpdateContactUseCase updateContactUseCase,
                                   EtiquetaService etiquetaService,
                                   CampoDinamicoRepository campoDinamicoRepository) {
-        this.contactoService         = contactoService;
+        this.createContactUseCase    = createContactUseCase;
+        this.updateContactUseCase    = updateContactUseCase;
         this.etiquetaService         = etiquetaService;
         this.campoDinamicoRepository = campoDinamicoRepository;
     }
@@ -188,18 +193,15 @@ public class ContactoFormController {
             if (!tf.getText().isBlank()) camposMap.put(id, tf.getText().trim());
         });
 
-        ContactoDTO dto = ContactoDTO.builder()
-            .nombre(nombre).dni(dni).direccion(direccion)
-            .fotoPerfilPath(fotoPath)
-            .etiquetaIds(etiquetaIds)
-            .camposDinamicos(camposMap)
-            .build();
-
         try {
             if (contactoExistente != null) {
-                contactoService.update(contactoExistente.getId(), dto);
+                updateContactUseCase.update(new UpdateContactCommand(
+                    contactoExistente.getId(), nombre, dni, direccion, fotoPath, etiquetaIds, camposMap
+                ));
             } else {
-                contactoService.save(dto);
+                createContactUseCase.create(new CreateContactCommand(
+                    nombre, dni, direccion, fotoPath, etiquetaIds, camposMap
+                ));
             }
             if (onSuccess != null) onSuccess.run();
             ((Stage) btnGuardar.getScene().getWindow()).close();

@@ -1,5 +1,7 @@
 package com.crm.personal.application.service;
 
+import com.crm.personal.application.contact.command.CreateContactCommand;
+import com.crm.personal.application.contact.port.CreateContactUseCase;
 import com.crm.personal.application.dto.ContactoDTO;
 import com.crm.personal.application.dto.ImportResultDTO;
 import com.crm.personal.infrastructure.persistence.model.*;
@@ -48,7 +50,7 @@ public class ExportImportService {
     private final ContactoRepository      contactoRepo;
     private final CampoDinamicoRepository campoRepo;
     private final TimelineRecordRepository timelineRepo;
-    private final ContactoService         contactoService;
+    private final CreateContactUseCase    createContactUseCase;
 
     @Value("${app.data.dir}")
     private String dataDir;
@@ -56,11 +58,11 @@ public class ExportImportService {
     public ExportImportService(ContactoRepository contactoRepo,
                                CampoDinamicoRepository campoRepo,
                                TimelineRecordRepository timelineRepo,
-                               ContactoService contactoService) {
+                               CreateContactUseCase createContactUseCase) {
         this.contactoRepo   = contactoRepo;
         this.campoRepo      = campoRepo;
         this.timelineRepo   = timelineRepo;
-        this.contactoService = contactoService;
+        this.createContactUseCase = createContactUseCase;
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -438,7 +440,14 @@ public class ExportImportService {
                     .build();
 
                 try {
-                    contactoService.save(dto);
+                    createContactUseCase.create(new CreateContactCommand(
+                        dto.getNombre(),
+                        dto.getDni(),
+                        dto.getDireccion(),
+                        dto.getFotoPerfilPath(),
+                        dto.getEtiquetaIds(),
+                        dto.getCamposDinamicos()
+                    ));
                     resultado.addImportado();
                 } catch (IllegalArgumentException ex) {
                     resultado.addError("Fila " + (rowIdx + 1) + ": " + ex.getMessage());

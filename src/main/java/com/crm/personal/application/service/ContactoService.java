@@ -1,8 +1,15 @@
 package com.crm.personal.application.service;
 
+import com.crm.personal.application.contact.command.CreateContactCommand;
+import com.crm.personal.application.contact.command.SearchContactsQuery;
+import com.crm.personal.application.contact.command.UpdateContactCommand;
+import com.crm.personal.application.contact.dto.ContactDto;
+import com.crm.personal.application.contact.port.CreateContactUseCase;
+import com.crm.personal.application.contact.port.DeleteContactUseCase;
+import com.crm.personal.application.contact.port.SearchContactsUseCase;
+import com.crm.personal.application.contact.port.UpdateContactUseCase;
 import com.crm.personal.application.dto.ContactoDTO;
 import com.crm.personal.application.dto.SearchCriteriaDTO;
-import com.crm.personal.application.dto.SearchOperator;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,24 +28,27 @@ public class ContactoService {
 
     private static final Logger log = LoggerFactory.getLogger(ContactoService.class);
 
-    private final ContactoRepository          contactoRepo;
-    private final EtiquetaRepository          etiquetaRepo;
-    private final CampoDinamicoValorRepository valorRepo;
-    private final CampoDinamicoRepository     campoRepo;
+    private final ContactoRepository contactoRepo;
+    private final CreateContactUseCase createContactUseCase;
+    private final UpdateContactUseCase updateContactUseCase;
+    private final DeleteContactUseCase deleteContactUseCase;
+    private final SearchContactsUseCase searchContactsUseCase;
 
     public ContactoService(ContactoRepository contactoRepo,
-                           EtiquetaRepository etiquetaRepo,
-                           CampoDinamicoValorRepository valorRepo,
-                           CampoDinamicoRepository campoRepo) {
+                           CreateContactUseCase createContactUseCase,
+                           UpdateContactUseCase updateContactUseCase,
+                           DeleteContactUseCase deleteContactUseCase,
+                           SearchContactsUseCase searchContactsUseCase) {
         this.contactoRepo = contactoRepo;
-        this.etiquetaRepo = etiquetaRepo;
-        this.valorRepo    = valorRepo;
-        this.campoRepo    = campoRepo;
+        this.createContactUseCase = createContactUseCase;
+        this.updateContactUseCase = updateContactUseCase;
+        this.deleteContactUseCase = deleteContactUseCase;
+        this.searchContactsUseCase = searchContactsUseCase;
     }
 
     @Transactional(readOnly = true)
     public List<Contacto> findAll() {
-        return contactoRepo.findAllByOrderByNombreAsc();
+        return resolveContacts(searchContactsUseCase.search(new SearchContactsQuery(null, null, "AND")));
     }
 
     @Transactional(readOnly = true)
@@ -63,58 +73,23 @@ public class ContactoService {
 
     /** Crea un nuevo contacto. */
     public Contacto save(ContactoDTO dto) {
-        contactoRepo.findByDni(dto.getDni()).ifPresent(existing -> {
-            throw new IllegalArgumentException("Ya existe un contacto con DNI: " + dto.getDni());
-        });
-
-        Contacto contacto = Contacto.builder()
-                .nombre(dto.getNombre().trim())
-                .dni(dto.getDni().trim())
-                .direccion(dto.getDireccion().trim())
-                .fotoPerfilPath(dto.getFotoPerfilPath())
-                .build();
-
-        if (dto.getEtiquetaIds() != null && !dto.getEtiquetaIds().isEmpty()) {
-            contacto.setEtiquetas(new HashSet<>(etiquetaRepo.findAllById(dto.getEtiquetaIds())));
-        }
-
-        Contacto saved = contactoRepo.save(contacto);
-        saveCamposDinamicos(saved, dto.getCamposDinamicos());
-        log.info("Contacto creado: {} (DNI: {})", saved.getNombre(), saved.getDni());
-        return saved;
+        ContactDto saved = createContactUseCase.create(toCreateCommand(dto));
+        Contacto loaded = loadFull(saved.id());
+        log.info("Contacto creado: {} (DNI: {})", loaded.getNombre(), loaded.getDni());
+        return loaded;
     }
 
     /** Actualiza un contacto existente. */
     public Contacto update(Long id, ContactoDTO dto) {
-        Contacto contacto = findById(id);
-
-        // Validar DNI único (excluyendo el propio)
-        contactoRepo.findByDni(dto.getDni()).ifPresent(existing -> {
-            if (!existing.getId().equals(id)) {
-                throw new IllegalArgumentException("Ya existe otro contacto con DNI: " + dto.getDni());
-            }
-        });
-
-        contacto.setNombre(dto.getNombre().trim());
-        contacto.setDni(dto.getDni().trim());
-        contacto.setDireccion(dto.getDireccion().trim());
-        contacto.setFotoPerfilPath(dto.getFotoPerfilPath());
-
-        contacto.getEtiquetas().clear();
-        if (dto.getEtiquetaIds() != null && !dto.getEtiquetaIds().isEmpty()) {
-            contacto.setEtiquetas(new HashSet<>(etiquetaRepo.findAllById(dto.getEtiquetaIds())));
-        }
-
-        Contacto updated = contactoRepo.save(contacto);
-        valorRepo.deleteByContactoId(id);
-        saveCamposDinamicos(updated, dto.getCamposDinamicos());
-        log.info("Contacto actualizado: {} (ID: {})", updated.getNombre(), id);
-        return updated;
+        ContactDto updated = updateContactUseCase.update(toUpdateCommand(id, dto));
+        Contacto loaded = loadFull(updated.id());
+        log.info("Contacto actualizado: {} (ID: {})", loaded.getNombre(), id);
+        return loaded;
     }
 
     public void delete(Long id) {
         Contacto contacto = findById(id);
-        contactoRepo.delete(contacto);
+        deleteContactUseCase.delete(id);
         log.info("Contacto eliminado: {} (ID: {})", contacto.getNombre(), id);
     }
 
@@ -123,53 +98,52 @@ public class ContactoService {
      */
     @Transactional(readOnly = true)
     public List<Contacto> search(SearchCriteriaDTO criteria) {
-        boolean hasTexto     = criteria.hasTexto();
-        boolean hasEtiquetas = criteria.hasEtiquetas();
+        ContactDto[] results = searchContactsUseCase.search(new SearchContactsQuery(
+                        criteria.getTexto(),
+                        criteria.getEtiquetaIds() == null ? null : new HashSet<>(criteria.getEtiquetaIds()),
+                        criteria.getOperador() == null ? "AND" : criteria.getOperador().name()
+                ))
+                .toArray(ContactDto[]::new);
 
-        if (!hasTexto && !hasEtiquetas) {
-            return findAll();
+        return resolveContacts(Arrays.asList(results));
+    }
+
+    private List<Contacto> resolveContacts(List<ContactDto> results) {
+        if (results.isEmpty()) {
+            return List.of();
         }
 
-        if (hasTexto && !hasEtiquetas) {
-            String txt = criteria.getTexto();
-            return contactoRepo.findByNombreContainingIgnoreCaseOrDniContaining(txt, txt);
-        }
+        Map<Long, Contacto> byId = contactoRepo.findAllById(
+                results.stream().map(ContactDto::id).toList()
+        ).stream().collect(Collectors.toMap(Contacto::getId, contacto -> contacto));
 
-        if (!hasTexto) {
-            List<Long> ids = criteria.getEtiquetaIds();
-            return criteria.getOperador() == SearchOperator.AND
-                    ? contactoRepo.findByAllEtiquetas(ids, (long) ids.size())
-                    : contactoRepo.findByAnyEtiqueta(ids);
-        }
-
-        // Texto + etiquetas: filtrar por etiquetas primero, luego por texto en memoria
-        List<Long> ids = criteria.getEtiquetaIds();
-        List<Contacto> porEtiqueta = criteria.getOperador() == SearchOperator.AND
-                ? contactoRepo.findByAllEtiquetas(ids, (long) ids.size())
-                : contactoRepo.findByAnyEtiqueta(ids);
-
-        String txt = criteria.getTexto().toLowerCase();
-        return porEtiqueta.stream()
-                .filter(c -> c.getNombre().toLowerCase().contains(txt)
-                          || c.getDni().contains(txt))
+        return results.stream()
+                .map(ContactDto::id)
+                .map(byId::get)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    private CreateContactCommand toCreateCommand(ContactoDTO dto) {
+        return new CreateContactCommand(
+                dto.getNombre(),
+                dto.getDni(),
+                dto.getDireccion(),
+                dto.getFotoPerfilPath(),
+                dto.getEtiquetaIds(),
+                dto.getCamposDinamicos()
+        );
+    }
 
-    private void saveCamposDinamicos(Contacto contacto, Map<Long, String> camposMap) {
-        if (camposMap == null || camposMap.isEmpty()) return;
-
-        camposMap.forEach((campoId, valor) -> {
-            if (valor == null || valor.isBlank()) return;
-            campoRepo.findById(campoId).ifPresent(campo -> {
-                CampoDinamicoValor v = CampoDinamicoValor.builder()
-                        .contacto(contacto)
-                        .campo(campo)
-                        .valor(valor.trim())
-                        .build();
-                valorRepo.save(v);
-            });
-        });
+    private UpdateContactCommand toUpdateCommand(Long id, ContactoDTO dto) {
+        return new UpdateContactCommand(
+                id,
+                dto.getNombre(),
+                dto.getDni(),
+                dto.getDireccion(),
+                dto.getFotoPerfilPath(),
+                dto.getEtiquetaIds(),
+                dto.getCamposDinamicos()
+        );
     }
 }
