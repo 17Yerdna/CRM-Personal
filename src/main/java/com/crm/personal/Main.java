@@ -1,6 +1,7 @@
 package com.crm.personal;
 
-import com.crm.personal.infrastructure.security.PasswordHolder;
+import com.crm.personal.infrastructure.security.MasterPassword;
+import com.crm.personal.infrastructure.security.MasterPasswordBootstrapVerifier;
 import com.crm.personal.presentation.FxmlView;
 import com.crm.personal.presentation.StageManager;
 import javafx.application.Application;
@@ -17,38 +18,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 
 /**
- * Punto de entrada de la aplicación CRM Personal.
+ * Punto de entrada JavaFX de la aplicación.
  *
  * <p><b>Flujo de arranque:</b>
  * <ol>
  *   <li>JavaFX inicia; se muestra un diálogo de login ANTES de que Spring comience.</li>
- *   <li>Se verifica la contraseña con BCrypt contra el hash almacenado en disco.</li>
- *   <li>La contraseña se guarda en {@link PasswordHolder}.</li>
- *   <li>Spring Boot inicia su contexto; {@code DatabaseConfig} lee la contraseña
- *       para abrir la base de datos SQLite cifrada con SQLCipher.</li>
+ *   <li>Se verifica la contraseña maestra contra el hash local antes de iniciar Spring.</li>
+ *   <li>La contraseña se registra como bean singleton mediante {@link SpringApplicationBuilder#initializers}.</li>
+ *   <li>Spring Boot inicia su contexto y {@code DatabaseConfig} recibe la contraseña por DI.</li>
  *   <li>Se muestra la ventana principal.</li>
  * </ol>
  */
-public class MainApp extends Application {
+public class Main extends Application {
 
-    private static final Logger log = LoggerFactory.getLogger(MainApp.class);
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
 
-    private static ConfigurableApplicationContext springContext;
-
-    /** Directorio y archivo de hash de contraseña (pre-Spring, sin @Value) */
-    private static final String AUTH_DIR  = System.getProperty("user.home") + "/.crm-personal";
-    private static final String AUTH_FILE = AUTH_DIR + "/auth.bcrypt";
-
-    /** BCrypt reutilizable sin necesitar contexto Spring */
-    private static final BCryptPasswordEncoder BCRYPT = new BCryptPasswordEncoder(12);
+    private ConfigurableApplicationContext springContext;
+    private MasterPassword masterPassword;
 
     public static void main(String[] args) {
         launch(args);
@@ -57,42 +46,22 @@ public class MainApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            Path authPath       = Paths.get(AUTH_FILE);
-            boolean primerUso   = !Files.exists(authPath);
-
-            String password = primerUso
-                    ? mostrarDialogoCrearPassword(primaryStage)
-                    : mostrarDialogoLogin(primaryStage);
+            char[] password = requestMasterPassword(primaryStage);
 
             if (password == null) {
                 Platform.exit();
                 return;
             }
 
-            if (primerUso) {
-                // Primer uso: guardar hash
-                Files.createDirectories(Paths.get(AUTH_DIR));
-                Files.writeString(authPath, BCRYPT.encode(password), StandardCharsets.UTF_8);
-                log.info("Contraseña maestra creada.");
-            } else {
-                // Verificar contraseña existente
-                String storedHash = Files.readString(authPath, StandardCharsets.UTF_8).trim();
-                if (!BCRYPT.matches(password, storedHash)) {
-                    mostrarError("Acceso denegado", "La contraseña maestra es incorrecta.");
-                    Platform.exit();
-                    return;
-                }
-            }
+            MasterPasswordBootstrapVerifier.verifyOrInitialize(password);
+            this.masterPassword = new MasterPassword(password);
+            Arrays.fill(password, '\0');
 
-            // Guardar contraseña para que DatabaseConfig la use
-            PasswordHolder.setPassword(password);
-
-            // Iniciar Spring Boot
             springContext = new SpringApplicationBuilder(CrmApplication.class)
                     .headless(false)
+                    .initializers(context -> context.getBeanFactory().registerSingleton("masterPassword", masterPassword))
                     .run();
 
-            // Configurar y mostrar ventana principal
             StageManager stageManager = springContext.getBean(StageManager.class);
             stageManager.setPrimaryStage(primaryStage);
             primaryStage.setMinWidth(1050);
@@ -109,14 +78,24 @@ public class MainApp extends Application {
 
     @Override
     public void stop() {
-        if (springContext != null) springContext.close();
-        PasswordHolder.clearPassword();
+        if (springContext != null) {
+            springContext.close();
+        }
+        if (masterPassword != null) {
+            masterPassword.clear();
+        }
         Platform.exit();
     }
 
     // ─── Diálogos pre-Spring ──────────────────────────────────────────────────
 
-    private String mostrarDialogoLogin(Stage owner) {
+    private char[] requestMasterPassword(Stage owner) {
+        return MasterPasswordBootstrapVerifier.isFirstRun()
+                ? mostrarDialogoCrearPassword(owner)
+                : mostrarDialogoLogin(owner);
+    }
+
+    private char[] mostrarDialogoLogin(Stage owner) {
         Stage dialog = buildDialog(owner, "CRM Personal \u2014 Acceso");
 
         // ── ícono + título en card ──────────────────────────────
@@ -140,13 +119,13 @@ public class MainApp extends Application {
         error.setVisible(false);
         Button btnOk = primaryButton("Acceder");
 
-        final String[] result = { null };
+        final char[][] result = { null };
         Runnable tryLogin = () -> {
             if (pass.getText().isBlank()) {
                 error.setText("La contrase\u00f1a no puede estar vac\u00eda.");
                 error.setVisible(true);
             } else {
-                result[0] = pass.getText();
+                result[0] = pass.getText().toCharArray();
                 dialog.close();
             }
         };
@@ -157,7 +136,7 @@ public class MainApp extends Application {
         return result[0];
     }
 
-    private String mostrarDialogoCrearPassword(Stage owner) {
+    private char[] mostrarDialogoCrearPassword(Stage owner) {
         Stage dialog = buildDialog(owner, "CRM Personal \u2014 Configuraci\u00f3n inicial");
 
         // Header
@@ -194,7 +173,7 @@ public class MainApp extends Application {
         error.setVisible(false);
         Button btnOk = primaryButton("Crear y continuar");
 
-        final String[] result = { null };
+        final char[][] result = { null };
         btnOk.setOnAction(e -> {
             String p1 = pass1.getText();
             String p2 = pass2.getText();
@@ -205,7 +184,7 @@ public class MainApp extends Application {
                 error.setText("Las contrase\u00f1as no coinciden.");
                 error.setVisible(true);
             } else {
-                result[0] = p1;
+                result[0] = p1.toCharArray();
                 dialog.close();
             }
         });

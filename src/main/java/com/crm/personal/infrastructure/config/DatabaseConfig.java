@@ -1,6 +1,6 @@
 package com.crm.personal.infrastructure.config;
 
-import com.crm.personal.infrastructure.security.PasswordHolder;
+import com.crm.personal.infrastructure.security.MasterPassword;
 import jakarta.persistence.EntityManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,7 @@ import java.util.Properties;
 /**
  * Configuración de base de datos SQLite cifrada con SQLCipher.
  *
- * La contraseña maestra se lee de {@link PasswordHolder}, que se establece
- * en {@code MainApp} ANTES de que Spring inicie su contexto.
+ * La contraseña maestra se registra como bean antes de iniciar Spring.
  */
 @Configuration
 @EnableTransactionManagement
@@ -36,7 +35,7 @@ public class DatabaseConfig {
     private String dataDir;
 
     @Bean
-    public DataSource dataSource() {
+    public DataSource dataSource(MasterPassword masterPassword) {
         // Asegurar que el directorio de datos existe
         File dir = new File(dataDir);
         if (!dir.exists() && !dir.mkdirs()) {
@@ -44,7 +43,7 @@ public class DatabaseConfig {
         }
 
         String dbPath  = dataDir + "/crm.db";
-        String password = PasswordHolder.getPassword();
+        String password = masterPassword.asString();
 
         DriverManagerDataSource ds = new DriverManagerDataSource();
         ds.setDriverClassName("org.sqlite.JDBC");
