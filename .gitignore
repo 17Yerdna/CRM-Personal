@@ -1,0 +1,14 @@
+target/
+.idea/
+.vscode/
+*.iml
+
+# Runtime data
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

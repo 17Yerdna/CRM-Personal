@@ -1,0 +1,420 @@
+/* ═══════════════════════════════════════════════════════════════════
+   CRM Personal — Light Warm Theme  (Material Design 3 — Olive/Cream)
+   Background #fff8f2 | Surface #ffffff | Primary #5a6147
+   Basado en los mockups de diseño generados por IA
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Root ────────────────────────────────────────────────────────── */
+.root {
+    -fx-base: #fff8f2;
+    -fx-background: #fff8f2;
+    -fx-control-inner-background: #ffffff;
+    -fx-accent: #5a6147;
+    -fx-focus-color: #5a6147;
+    -fx-faint-focus-color: transparent;
+    -fx-text-fill: #1e1b16;
+    -fx-font-family: "Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+}
+
+/* ── Labels ──────────────────────────────────────────────────────── */
+.label {
+    -fx-text-fill: #1e1b16;
+}
+
+.label-muted {
+    -fx-text-fill: #46483f;
+    -fx-font-size: 12px;
+}
+
+.label-tiny {
+    -fx-text-fill: #77786e;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e1b16;
+}
+
+.contact-name {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e1b16;
+}
+
+/* ── Cards ───────────────────────────────────────────────────────── */
+.card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e9e1d8;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, #0000000a, 10, 0, 0, 2);
+    -fx-padding: 16;
+}
+
+.card-profile {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 16;
+    -fx-border-color: #e9e1d8;
+    -fx-border-radius: 16;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, #0000000d, 16, 0, 0, 3);
+    -fx-padding: 20;
+}
+
+/* ── Tag Chips ───────────────────────────────────────────────────── */
+.tag-chip {
+    -fx-background-radius: 999;
+    -fx-border-radius: 999;
+    -fx-border-width: 1;
+    -fx-border-color: #e9e1d8;
+    -fx-background-color: #faf2e9;
+    -fx-text-fill: #46483f;
+    -fx-padding: 4 12;
+    -fx-font-size: 12px;
+}
+
+/* ── Text Inputs ─────────────────────────────────────────────────── */
+.text-field,
+.password-field {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e1b16;
+    -fx-prompt-text-fill: #77786e;
+    -fx-border-color: #c7c7bc;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 10 12;
+    -fx-font-size: 14px;
+}
+.text-field:focused,
+.password-field:focused {
+    -fx-border-color: #5a6147;
+    -fx-effect: dropshadow(gaussian, #5a614726, 6, 0, 0, 0);
+}
+.text-field:hover,
+.password-field:hover {
+    -fx-border-color: #77786e;
+}
+
+.text-area {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e1b16;
+    -fx-prompt-text-fill: #77786e;
+    -fx-border-color: #c7c7bc;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-font-size: 14px;
+}
+.text-area .content {
+    -fx-background-color: #ffffff;
+}
+
+/* ── Buttons — Base ──────────────────────────────────────────────── */
+.button {
+    -fx-background-color: #f5ede4;
+    -fx-text-fill: #1e1b16;
+    -fx-background-radius: 8;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+    -fx-padding: 9 16;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+.button:hover {
+    -fx-background-color: #efe7de;
+}
+.button:pressed {
+    -fx-background-color: #e9e1d8;
+}
+
+/* Primary (olive green) */
+.btn-primary {
+    -fx-background-color: #5a6147;
+    -fx-text-fill: #ffffff;
+}
+.btn-primary:hover {
+    -fx-background-color: #4a5137;
+}
+.btn-primary:pressed {
+    -fx-background-color: #3c4229;
+}
+
+/* Secondary container */
+.btn-primary-container {
+    -fx-background-color: #8f9779;
+    -fx-text-fill: #282f18;
+}
+.btn-primary-container:hover {
+    -fx-background-color: #7d8568;
+}
+
+/* Danger (delete) */
+.btn-danger {
+    -fx-background-color: #ffdad6;
+    -fx-text-fill: #ba1a1a;
+    -fx-background-radius: 8;
+}
+.btn-danger:hover {
+    -fx-background-color: #ffb4ab;
+}
+.btn-danger:pressed {
+    -fx-background-color: #ff8d80;
+}
+
+/* Export button */
+.btn-export {
+    -fx-background-color: #d4eca2;
+    -fx-text-fill: #141f00;
+    -fx-background-radius: 8;
+}
+.btn-export:hover {
+    -fx-background-color: #c4dc92;
+}
+
+/* Circular icon button — primary */
+.btn-icon-primary {
+    -fx-background-color: #8f9779;
+    -fx-text-fill: #282f18;
+    -fx-background-radius: 999;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-padding: 0;
+    -fx-font-size: 15px;
+}
+.btn-icon-primary:hover {
+    -fx-background-color: #7d8568;
+}
+
+/* Circular icon button — secondary */
+.btn-icon-secondary {
+    -fx-background-color: #f5ede4;
+    -fx-text-fill: #46483f;
+    -fx-background-radius: 999;
+    -fx-border-color: #e9e1d8;
+    -fx-border-width: 1;
+    -fx-border-radius: 999;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-max-width: 36;
+    -fx-max-height: 36;
+    -fx-padding: 0;
+    -fx-font-size: 15px;
+}
+.btn-icon-secondary:hover {
+    -fx-background-color: #efe7de;
+}
+
+/* ── ListView ────────────────────────────────────────────────────── */
+.list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1e1b16;
+    -fx-padding: 8 12;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #f5ede4;
+}
+.list-cell:filled:hover {
+    -fx-background-color: #faf2e9;
+    -fx-background-radius: 8;
+}
+.list-cell:filled:selected {
+    -fx-background-color: #d4eca2;
+    -fx-text-fill: #1e1b16;
+    -fx-background-radius: 8;
+}
+.list-cell:filled:selected:hover {
+    -fx-background-color: #c4dc92;
+}
+
+/* ── TreeView ────────────────────────────────────────────────────── */
+.tree-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1e1b16;
+    -fx-padding: 5 8;
+}
+.tree-cell:filled:hover {
+    -fx-background-color: #faf2e9;
+    -fx-background-radius: 6;
+}
+.tree-cell:filled:selected {
+    -fx-background-color: #d4eca2;
+    -fx-text-fill: #1e1b16;
+    -fx-background-radius: 6;
+}
+.tree-cell:filled:selected:hover {
+    -fx-background-color: #c4dc92;
+    -fx-background-radius: 6;
+}
+.tree-cell .tree-disclosure-node .arrow {
+    -fx-background-color: #77786e;
+}
+
+/* ── ScrollPane ──────────────────────────────────────────────────── */
+.scroll-pane,
+.scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: #e9e1d8;
+    -fx-background-radius: 4;
+}
+.scroll-bar .thumb {
+    -fx-background-color: #c7c7bc;
+    -fx-background-radius: 4;
+}
+.scroll-bar .thumb:hover {
+    -fx-background-color: #77786e;
+}
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2;
+}
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #77786e;
+}
+
+/* ── SplitPane ───────────────────────────────────────────────────── */
+.split-pane {
+    -fx-background-color: #faf2e9;
+    -fx-padding: 0;
+}
+.split-pane-divider {
+    -fx-background-color: #e9e1d8;
+    -fx-padding: 0 1;
+}
+
+/* ── ComboBox ────────────────────────────────────────────────────── */
+.combo-box {
+    -fx-background-color: #ffffff;
+    -fx-text-fill: #1e1b16;
+    -fx-border-color: #c7c7bc;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+.combo-box .list-cell {
+    -fx-text-fill: #1e1b16;
+    -fx-background-color: #ffffff;
+}
+.combo-box:hover {
+    -fx-border-color: #77786e;
+}
+.combo-box:focused {
+    -fx-border-color: #5a6147;
+}
+.combo-box-popup .list-view {
+    -fx-background-color: #ffffff;
+}
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #faf2e9;
+}
+
+/* ── ColorPicker ─────────────────────────────────────────────────── */
+.color-picker {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c7c7bc;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+}
+.color-picker .color-picker-label {
+    -fx-text-fill: #1e1b16;
+}
+
+/* ── RadioButton ─────────────────────────────────────────────────── */
+.radio-button {
+    -fx-text-fill: #1e1b16;
+    -fx-font-size: 13px;
+}
+.radio-button .radio {
+    -fx-border-color: #77786e;
+    -fx-background-color: #ffffff;
+}
+.radio-button:selected .radio {
+    -fx-border-color: #5a6147;
+}
+.radio-button:selected .dot {
+    -fx-background-color: #5a6147;
+}
+
+/* ── Separator ───────────────────────────────────────────────────── */
+.separator .line {
+    -fx-border-color: #e9e1d8;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ── Dialog / Alert ──────────────────────────────────────────────── */
+.dialog-pane {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #c7c7bc;
+    -fx-background-radius: 8;
+}
+.dialog-pane .header-panel {
+    -fx-background-color: #faf2e9;
+}
+.dialog-pane .header-panel .label {
+    -fx-text-fill: #1e1b16;
+}
+.dialog-pane .content.label {
+    -fx-text-fill: #46483f;
+}
+.dialog-pane .button-bar .button {
+    -fx-background-color: #f5ede4;
+    -fx-text-fill: #1e1b16;
+}
+.dialog-pane .button-bar .button:default {
+    -fx-background-color: #5a6147;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+.dialog-pane .button-bar .button:default:hover {
+    -fx-background-color: #4a5137;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────── */
+.tooltip {
+    -fx-background-color: #34302a;
+    -fx-text-fill: #f8efe6;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+    -fx-font-size: 12px;
+}
+
+/* ── Timeline card ───────────────────────────────────────────────── */
+.timeline-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #e9e1d8;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(gaussian, #00000008, 8, 0, 0, 1);
+    -fx-padding: 14;
+}
+.timeline-card:hover {
+    -fx-effect: dropshadow(gaussian, #00000014, 12, 0, 0, 2);
+}
+
+/* ── Custom field row ────────────────────────────────────────────── */
+.field-label {
+    -fx-text-fill: #77786e;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+.field-value {
+    -fx-text-fill: #1e1b16;
+    -fx-font-size: 14px;
+}
