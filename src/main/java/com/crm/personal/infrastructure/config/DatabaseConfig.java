@@ -27,7 +27,7 @@ import java.util.Properties;
  */
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.crm.personal.domain.repository")
+@EnableJpaRepositories(basePackages = "com.crm.personal.infrastructure.persistence.repository")
 public class DatabaseConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
@@ -65,7 +65,7 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan("com.crm.personal.domain.model");
+        em.setPackagesToScan("com.crm.personal.infrastructure.persistence.model");
 
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(adapter);

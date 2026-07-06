@@ -2,10 +2,10 @@ package com.crm.personal.application.service;
 
 import com.crm.personal.application.dto.ContactoDTO;
 import com.crm.personal.application.dto.ImportResultDTO;
-import com.crm.personal.domain.model.*;
-import com.crm.personal.domain.repository.CampoDinamicoRepository;
-import com.crm.personal.domain.repository.ContactoRepository;
-import com.crm.personal.domain.repository.TimelineRecordRepository;
+import com.crm.personal.infrastructure.persistence.model.*;
+import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
+import com.crm.personal.infrastructure.persistence.repository.ContactoRepository;
+import com.crm.personal.infrastructure.persistence.repository.TimelineRecordRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;

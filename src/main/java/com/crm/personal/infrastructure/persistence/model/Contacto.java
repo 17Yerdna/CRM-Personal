@@ -1,4 +1,4 @@
-package com.crm.personal.domain.model;
+package com.crm.personal.infrastructure.persistence.model;
 
 import com.crm.personal.infrastructure.validation.ValidDni;
 import jakarta.persistence.*;

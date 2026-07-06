@@ -1,6 +1,6 @@
-package com.crm.personal.domain.repository;
+package com.crm.personal.infrastructure.persistence.repository;
 
-import com.crm.personal.domain.model.CampoDinamicoValor;
+import com.crm.personal.infrastructure.persistence.model.CampoDinamicoValor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

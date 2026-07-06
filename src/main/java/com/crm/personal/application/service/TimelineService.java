@@ -1,9 +1,9 @@
 package com.crm.personal.application.service;
 
-import com.crm.personal.domain.model.*;
-import com.crm.personal.domain.repository.ContactoRepository;
-import com.crm.personal.domain.repository.MediaAdjuntoRepository;
-import com.crm.personal.domain.repository.TimelineRecordRepository;
+import com.crm.personal.infrastructure.persistence.model.*;
+import com.crm.personal.infrastructure.persistence.repository.ContactoRepository;
+import com.crm.personal.infrastructure.persistence.repository.MediaAdjuntoRepository;
+import com.crm.personal.infrastructure.persistence.repository.TimelineRecordRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.Hibernate;
 import org.slf4j.Logger;

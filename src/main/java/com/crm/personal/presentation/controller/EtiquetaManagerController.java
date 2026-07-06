@@ -2,7 +2,7 @@ package com.crm.personal.presentation.controller;
 
 import com.crm.personal.application.dto.EtiquetaDTO;
 import com.crm.personal.application.service.EtiquetaService;
-import com.crm.personal.domain.model.Etiqueta;
+import com.crm.personal.infrastructure.persistence.model.Etiqueta;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;

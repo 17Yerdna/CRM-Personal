@@ -1,8 +1,8 @@
 package com.crm.personal.application.service;
 
 import com.crm.personal.application.dto.EtiquetaDTO;
-import com.crm.personal.domain.model.Etiqueta;
-import com.crm.personal.domain.repository.EtiquetaRepository;
+import com.crm.personal.infrastructure.persistence.model.Etiqueta;
+import com.crm.personal.infrastructure.persistence.repository.EtiquetaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

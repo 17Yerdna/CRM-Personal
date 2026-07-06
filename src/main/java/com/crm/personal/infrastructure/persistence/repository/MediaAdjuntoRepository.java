@@ -1,6 +1,6 @@
-package com.crm.personal.domain.repository;
+package com.crm.personal.infrastructure.persistence.repository;
 
-import com.crm.personal.domain.model.MediaAdjunto;
+import com.crm.personal.infrastructure.persistence.model.MediaAdjunto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
