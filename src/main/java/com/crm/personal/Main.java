@@ -4,6 +4,7 @@ import com.crm.personal.infrastructure.security.MasterPassword;
 import com.crm.personal.infrastructure.security.MasterPasswordBootstrapVerifier;
 import com.crm.personal.presentation.FxmlView;
 import com.crm.personal.presentation.StageManager;
+import com.crm.personal.presentation.javafx.GlobalFxExceptionHandler;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -40,6 +41,7 @@ public class Main extends Application {
     private MasterPassword masterPassword;
 
     public static void main(String[] args) {
+        GlobalFxExceptionHandler.install();
         launch(args);
     }
 
