@@ -43,10 +43,15 @@ public class ContactApplicationService implements
 
     @Override
     public ContactDto create(CreateContactCommand command) {
+        Dni dni = new Dni(command.dni());
+        contacts.findByDni(dni).ifPresent(existing -> {
+            throw new IllegalArgumentException("Ya existe un contacto con DNI: " + command.dni());
+        });
+
         Contact contact = new Contact(
                 null,
                 new ContactName(command.name()),
-                new Dni(command.dni()),
+                dni,
                 command.address(),
                 blankToNull(command.profilePhotoPath()),
                 toTagIds(command.tagIds()),
@@ -63,11 +68,18 @@ public class ContactApplicationService implements
         ContactId id = new ContactId(command.id());
         Contact existing = contacts.findById(id)
                 .orElseThrow(() -> new NotFoundException("Contacto no encontrado: " + command.id()));
+        Dni dni = new Dni(command.dni());
+
+        contacts.findByDni(dni).ifPresent(found -> {
+            if (found.id() == null || !command.id().equals(found.id().value())) {
+                throw new IllegalArgumentException("Ya existe otro contacto con DNI: " + command.dni());
+            }
+        });
 
         Contact updated = new Contact(
                 existing.id(),
                 new ContactName(command.name()),
-                new Dni(command.dni()),
+                dni,
                 command.address(),
                 blankToNull(command.profilePhotoPath()),
                 toTagIds(command.tagIds()),
