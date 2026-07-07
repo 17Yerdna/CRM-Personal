@@ -1,4 +1,4 @@
-package com.crm.personal.infrastructure.legacy;
+package com.crm.personal.infrastructure.desktop;
 
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.ContactoRepository;

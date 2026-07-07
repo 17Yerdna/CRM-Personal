@@ -1,4 +1,4 @@
-package com.crm.personal.infrastructure.legacy;
+package com.crm.personal.infrastructure.desktop;
 
 import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
