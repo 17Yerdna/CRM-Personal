@@ -19,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 /**
@@ -122,6 +125,7 @@ public class Main extends Application {
         Button btnOk = primaryButton("Acceder");
 
         final char[][] result = { null };
+        final boolean[] resetRequested = { false };
         Runnable tryLogin = () -> {
             if (pass.getText().isBlank()) {
                 error.setText("La contrase\u00f1a no puede estar vac\u00eda.");
@@ -134,7 +138,20 @@ public class Main extends Application {
         btnOk.setOnAction(e -> tryLogin.run());
         pass.setOnAction(e -> tryLogin.run());
 
-        show(dialog, 380, iconBox, titulo, sub, fieldLbl, pass, error, btnOk);
+        Hyperlink btnReset = new Hyperlink("Olvid\u00e9 mi contrase\u00f1a \u2014 resetear");
+        btnReset.setStyle("-fx-font-size:11px; -fx-text-fill:#77786e;");
+        btnReset.setOnAction(e -> {
+            if (confirmarReset(dialog)) {
+                resetearDatos();
+                resetRequested[0] = true;
+                dialog.close();
+            }
+        });
+
+        show(dialog, 380, iconBox, titulo, sub, fieldLbl, pass, error, btnOk, btnReset);
+        if (resetRequested[0]) {
+            return mostrarDialogoCrearPassword(owner);
+        }
         return result[0];
     }
 
@@ -193,6 +210,45 @@ public class Main extends Application {
 
         show(dialog, 400, iconBox, titulo, sub, warning, lbl1, pass1, lbl2, pass2, error, btnOk);
         return result[0];
+    }
+
+    // ─── Reset de datos ───────────────────────────────────────────────────────
+
+    private boolean confirmarReset(Stage owner) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Resetear datos");
+        confirm.setHeaderText("\u26a0\uFE0F Se eliminar\u00e1n TODOS los datos");
+        confirm.setContentText(
+            "Esta acci\u00f3n eliminar\u00e1 permanentemente:\n\n" +
+            "  \u2022 Tu contrase\u00f1a maestra\n" +
+            "  \u2022 Todos los contactos y expedientes\n" +
+            "  \u2022 Todas las etiquetas y notas\n\n" +
+            "Esta acci\u00f3n NO se puede deshacer."
+        );
+        confirm.initOwner(owner);
+        confirm.initModality(Modality.APPLICATION_MODAL);
+        ButtonType btnReset = new ButtonType("S\u00ed, eliminar todo", ButtonBar.ButtonData.OK_DONE);
+        confirm.getButtonTypes().setAll(btnReset, ButtonType.CANCEL);
+        return confirm.showAndWait().filter(b -> b == btnReset).isPresent();
+    }
+
+    private void resetearDatos() {
+        Path dataDir = MasterPasswordBootstrapVerifier.getDataDir();
+        try {
+            if (Files.exists(dataDir)) {
+                Files.walk(dataDir)
+                    .sorted((a, b) -> b.compareTo(a))
+                    .forEach(path -> {
+                        try {
+                            Files.deleteIfExists(path);
+                        } catch (IOException ignored) {
+                        }
+                    });
+            }
+            log.info("Datos de la aplicaci\u00f3n eliminados correctamente.");
+        } catch (IOException e) {
+            log.error("Error al eliminar datos", e);
+        }
     }
 
     // ─── Helpers de UI ────────────────────────────────────────────────────────

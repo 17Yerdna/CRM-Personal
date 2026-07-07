@@ -16,6 +16,10 @@ public final class MasterPasswordBootstrapVerifier {
     private MasterPasswordBootstrapVerifier() {
     }
 
+    public static Path getDataDir() {
+        return AUTH_DIR;
+    }
+
     public static boolean isFirstRun() {
         return !Files.exists(AUTH_FILE);
     }
