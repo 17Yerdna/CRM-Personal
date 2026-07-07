@@ -1,4 +1,4 @@
-package com.crm.personal.infrastructure.config;
+package com.crm.personal.presentation.javafx;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

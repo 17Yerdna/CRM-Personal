@@ -5,7 +5,7 @@ import com.crm.personal.application.dto.SearchOperator;
 import com.crm.personal.infrastructure.legacy.*;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
-import com.crm.personal.infrastructure.config.SpringFXMLLoader;
+import com.crm.personal.presentation.javafx.SpringFXMLLoader;
 import com.crm.personal.presentation.FxmlView;
 import com.crm.personal.presentation.StageManager;
 import javafx.application.Platform;

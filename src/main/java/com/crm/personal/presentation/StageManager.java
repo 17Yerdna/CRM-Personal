@@ -1,6 +1,6 @@
 package com.crm.personal.presentation;
 
-import com.crm.personal.infrastructure.config.SpringFXMLLoader;
+import com.crm.personal.presentation.javafx.SpringFXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
