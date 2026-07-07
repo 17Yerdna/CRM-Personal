@@ -18,4 +18,20 @@ class DomainIsolationTest {
                     "jakarta.persistence..",
                     "javafx.."
             );
+
+    @ArchTest
+    static final ArchRule domain_must_not_depend_on_application = noClasses()
+            .that().resideInAPackage("..domain..")
+            .should().dependOnClassesThat().resideInAnyPackage("..application..");
+
+    @ArchTest
+    static final ArchRule application_must_not_depend_on_frameworks_or_adapters = noClasses()
+            .that().resideInAPackage("..application..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "org.springframework..",
+                    "jakarta.persistence..",
+                    "javafx..",
+                    "..infrastructure..",
+                    "..presentation.."
+            );
 }
