@@ -127,12 +127,27 @@ public class MainController {
             @Override
             protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) { setText(null); setStyle(""); }
-                else {
-                    setText(item.nombre());
-                    setStyle(item.colorHex() != null
-                        ? "-fx-text-fill:" + item.colorHex() + ";"
-                        : "-fx-text-fill:#c0c0d0;");
+                if (empty || item == null) {
+                    setGraphic(null);
+                    setText(null);
+                } else {
+                    String color = item.colorHex() != null ? item.colorHex() : "#c2c8bf";
+                    
+                    Region colorIndicator = new Region();
+                    colorIndicator.setPrefSize(6, 16);
+                    colorIndicator.setMaxSize(6, 16);
+                    colorIndicator.setStyle(
+                        "-fx-background-color: " + color + ";" +
+                        "-fx-background-radius: 3;"
+                    );
+                    
+                    Label nameLabel = new Label(item.nombre());
+                    nameLabel.setStyle("-fx-text-fill: #2c2c2c;");
+                    
+                    HBox hbox = new HBox(8, colorIndicator, nameLabel);
+                    hbox.setAlignment(Pos.CENTER_LEFT);
+                    setGraphic(hbox);
+                    setText(null);
                 }
             }
         });

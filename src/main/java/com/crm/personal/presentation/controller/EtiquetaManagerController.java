@@ -5,7 +5,10 @@ import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
 import com.crm.personal.application.desktop.dto.DesktopEtiquetaDto;
 import com.crm.personal.application.desktop.port.DesktopCrmUseCase;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.springframework.context.annotation.Scope;
@@ -53,13 +56,26 @@ public class EtiquetaManagerController {
             protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
+                    setGraphic(null);
                     setText(null);
-                    setStyle("");
                 } else {
-                    setText(item.nombre());
-                    setStyle(item.colorHex() != null
-                        ? "-fx-text-fill: " + item.colorHex() + ";"
-                        : "");
+                    String color = item.colorHex() != null ? item.colorHex() : "#c2c8bf";
+                    
+                    Region colorIndicator = new Region();
+                    colorIndicator.setPrefSize(6, 16);
+                    colorIndicator.setMaxSize(6, 16);
+                    colorIndicator.setStyle(
+                        "-fx-background-color: " + color + ";" +
+                        "-fx-background-radius: 3;"
+                    );
+                    
+                    Label nameLabel = new Label(item.nombre());
+                    nameLabel.setStyle("-fx-text-fill: #2c2c2c;");
+                    
+                    HBox hbox = new HBox(8, colorIndicator, nameLabel);
+                    hbox.setAlignment(Pos.CENTER_LEFT);
+                    setGraphic(hbox);
+                    setText(null);
                 }
             }
         });
