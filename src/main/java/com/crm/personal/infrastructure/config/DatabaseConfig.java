@@ -72,7 +72,7 @@ public class DatabaseConfig {
         Properties props = new Properties();
         props.setProperty("hibernate.dialect",
                 "org.hibernate.community.dialect.SQLiteDialect");
-        props.setProperty("hibernate.hbm2ddl.auto", "validate");
+        props.setProperty("hibernate.hbm2ddl.auto", "none");
         props.setProperty("hibernate.show_sql", "false");
         props.setProperty("hibernate.jdbc.lob.non_contextual_creation", "true");
         em.setJpaProperties(props);
