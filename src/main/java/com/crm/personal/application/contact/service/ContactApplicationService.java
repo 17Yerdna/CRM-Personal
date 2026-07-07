@@ -19,7 +19,6 @@ import com.crm.personal.domain.contact.port.ContactRepositoryPort;
 import com.crm.personal.domain.dynamicfield.model.DynamicFieldValue;
 import com.crm.personal.domain.shared.NotFoundException;
 import com.crm.personal.domain.tag.model.TagId;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@Service
 public class ContactApplicationService implements
         CreateContactUseCase,
         UpdateContactUseCase,

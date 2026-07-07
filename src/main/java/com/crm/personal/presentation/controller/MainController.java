@@ -2,7 +2,7 @@ package com.crm.personal.presentation.controller;
 
 import com.crm.personal.application.dto.SearchCriteriaDTO;
 import com.crm.personal.application.dto.SearchOperator;
-import com.crm.personal.application.service.*;
+import com.crm.personal.infrastructure.legacy.*;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
 import com.crm.personal.infrastructure.config.SpringFXMLLoader;

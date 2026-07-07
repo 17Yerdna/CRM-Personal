@@ -6,9 +6,7 @@ import com.crm.personal.application.timeline.port.AddTimelineNoteUseCase;
 import com.crm.personal.domain.contact.model.ContactId;
 import com.crm.personal.domain.timeline.model.TimelineRecord;
 import com.crm.personal.domain.timeline.port.TimelineRepositoryPort;
-import org.springframework.stereotype.Service;
 
-@Service
 public class TimelineApplicationService implements AddTimelineNoteUseCase {
 
     private final TimelineRepositoryPort timelineRepository;

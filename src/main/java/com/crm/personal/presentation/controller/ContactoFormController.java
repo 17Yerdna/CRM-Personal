@@ -4,7 +4,7 @@ import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.command.UpdateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
 import com.crm.personal.application.contact.port.UpdateContactUseCase;
-import com.crm.personal.application.service.EtiquetaService;
+import com.crm.personal.infrastructure.legacy.EtiquetaService;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
 import javafx.fxml.FXML;

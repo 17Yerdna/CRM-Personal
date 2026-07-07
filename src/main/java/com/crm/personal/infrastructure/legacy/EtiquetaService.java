@@ -1,4 +1,4 @@
-package com.crm.personal.application.service;
+package com.crm.personal.infrastructure.legacy;
 
 import com.crm.personal.application.dto.EtiquetaDTO;
 import com.crm.personal.infrastructure.persistence.model.Etiqueta;

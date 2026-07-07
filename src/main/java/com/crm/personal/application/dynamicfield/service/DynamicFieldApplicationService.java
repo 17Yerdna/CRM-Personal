@@ -12,12 +12,10 @@ import com.crm.personal.domain.dynamicfield.port.DynamicFieldValueRepositoryPort
 import com.crm.personal.domain.dynamicfield.validation.DateFieldValidator;
 import com.crm.personal.domain.dynamicfield.validation.FieldValidator;
 import com.crm.personal.domain.dynamicfield.validation.TextFieldValidator;
-import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;
 import java.util.List;
 
-@Service
 public class DynamicFieldApplicationService implements SaveDynamicFieldValueUseCase {
 
     private final DynamicFieldRepositoryPort fields;
