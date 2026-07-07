@@ -13,7 +13,9 @@ import com.crm.personal.application.dto.EtiquetaDTO;
 import com.crm.personal.application.dto.ImportResultDTO;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,13 +96,21 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DesktopEtiquetaDto> findAllTags() {
-        return etiquetaService.findAll().stream().map(this::toTagDto).toList();
+        return etiquetaService.findAll().stream()
+                .peek(tag -> Hibernate.initialize(tag.getHijos()))
+                .map(this::toTagDto)
+                .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<DesktopEtiquetaDto> findRootTags() {
-        return etiquetaService.findRoots().stream().map(this::toTagDto).toList();
+        return etiquetaService.findRoots().stream()
+                .peek(tag -> Hibernate.initialize(tag.getHijos()))
+                .map(this::toTagDto)
+                .toList();
     }
 
     @Override
