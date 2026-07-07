@@ -169,7 +169,7 @@ public class MainController {
     private void cargarEtiquetas() {
         TreeItem<DesktopEtiquetaDto> root = new TreeItem<>();
         root.setExpanded(true);
-        desktopCrm.findRootTags().forEach(e -> root.getChildren().add(toTreeItem(e)));
+        desktopCrm.findAllTags().forEach(e -> root.getChildren().add(toTreeItem(e)));
         etiquetasTreeView.setRoot(root);
         etiquetasTreeView.setShowRoot(false);
     }
@@ -177,7 +177,6 @@ public class MainController {
     private TreeItem<DesktopEtiquetaDto> toTreeItem(DesktopEtiquetaDto e) {
         TreeItem<DesktopEtiquetaDto> item = new TreeItem<>(e);
         item.setExpanded(true);
-        e.hijos().forEach(hijo -> item.getChildren().add(toTreeItem(hijo)));
         return item;
     }
 

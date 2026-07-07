@@ -9,11 +9,5 @@ import java.util.List;
 @Repository
 public interface EtiquetaRepository extends JpaRepository<Etiqueta, Long> {
 
-    /** Etiquetas raíz (sin padre) */
-    List<Etiqueta> findByPadreIsNull();
-
-    /** Hijos directos de una etiqueta */
-    List<Etiqueta> findByPadre(Etiqueta padre);
-
     List<Etiqueta> findByNombreContainingIgnoreCase(String nombre);
 }

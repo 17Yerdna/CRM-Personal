@@ -99,16 +99,6 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
     @Transactional(readOnly = true)
     public List<DesktopEtiquetaDto> findAllTags() {
         return etiquetaService.findAll().stream()
-                .peek(tag -> Hibernate.initialize(tag.getHijos()))
-                .map(this::toTagDto)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<DesktopEtiquetaDto> findRootTags() {
-        return etiquetaService.findRoots().stream()
-                .peek(tag -> Hibernate.initialize(tag.getHijos()))
                 .map(this::toTagDto)
                 .toList();
     }
@@ -119,7 +109,6 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
                 .id(command.id())
                 .nombre(command.nombre())
                 .colorHex(command.colorHex())
-                .padreId(command.padreId())
                 .build());
     }
 
@@ -195,9 +184,7 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
         return new DesktopEtiquetaDto(
                 etiqueta.getId(),
                 etiqueta.getNombre(),
-                etiqueta.getColorHex(),
-                etiqueta.getPadre() != null ? etiqueta.getPadre().getId() : null,
-                etiqueta.getHijos() == null ? List.of() : etiqueta.getHijos().stream().map(this::toTagDto).toList()
+                etiqueta.getColorHex()
         );
     }
 

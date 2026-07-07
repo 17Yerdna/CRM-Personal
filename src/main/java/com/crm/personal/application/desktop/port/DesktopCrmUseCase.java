@@ -22,7 +22,6 @@ public interface DesktopCrmUseCase {
     void deleteContact(Long id);
 
     List<DesktopEtiquetaDto> findAllTags();
-    List<DesktopEtiquetaDto> findRootTags();
     void saveTag(DesktopSaveEtiquetaCommand command);
     void deleteTag(Long id);
 
