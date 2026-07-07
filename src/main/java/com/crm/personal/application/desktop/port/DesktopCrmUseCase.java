@@ -1,5 +1,6 @@
 package com.crm.personal.application.desktop.port;
 
+import com.crm.personal.application.desktop.command.DesktopSaveCampoDinamicoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveContactoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveMediaCommand;
@@ -26,6 +27,9 @@ public interface DesktopCrmUseCase {
     void deleteTag(Long id);
 
     List<DesktopCampoDinamicoDto> findActiveFields();
+    List<DesktopCampoDinamicoDto> findAllFields();
+    void saveCampoDinamico(DesktopSaveCampoDinamicoCommand command);
+    void deleteCampoDinamico(Long id);
 
     List<DesktopTimelineRecordDto> getTimeline(Long contactId);
     void addNote(Long contactId, String title, String html);

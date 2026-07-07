@@ -4,7 +4,8 @@ public enum FxmlView {
 
     MAIN("/fxml/main.fxml",                     "CRM Personal"),
     CONTACTO_FORM("/fxml/contacto-form.fxml",   "Gestionar Contacto"),
-    ETIQUETA_MANAGER("/fxml/etiqueta-manager.fxml", "Gestionar Etiquetas");
+    ETIQUETA_MANAGER("/fxml/etiqueta-manager.fxml", "Gestionar Etiquetas"),
+    CAMPO_MANAGER("/fxml/campo-manager.fxml", "Gestionar Campos");
 
     private final String fxmlPath;
     private final String title;

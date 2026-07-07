@@ -4,6 +4,7 @@ import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.command.UpdateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
 import com.crm.personal.application.contact.port.UpdateContactUseCase;
+import com.crm.personal.application.desktop.command.DesktopSaveCampoDinamicoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveContactoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveMediaCommand;
@@ -120,8 +121,32 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
     @Override
     public List<DesktopCampoDinamicoDto> findActiveFields() {
         return campoDinamicoRepository.findByActivoTrue().stream()
-                .map(field -> new DesktopCampoDinamicoDto(field.getId(), field.getNombre(), field.getTipo()))
+                .map(field -> new DesktopCampoDinamicoDto(field.getId(), field.getNombre(), field.getTipo(), field.isActivo()))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DesktopCampoDinamicoDto> findAllFields() {
+        return campoDinamicoRepository.findAll().stream()
+                .map(field -> new DesktopCampoDinamicoDto(field.getId(), field.getNombre(), field.getTipo(), field.isActivo()))
+                .toList();
+    }
+
+    @Override
+    public void saveCampoDinamico(DesktopSaveCampoDinamicoCommand command) {
+        CampoDinamico campo = (command.id() != null)
+                ? campoDinamicoRepository.findById(command.id()).orElse(new CampoDinamico())
+                : new CampoDinamico();
+        campo.setNombre(command.nombre());
+        campo.setTipo(command.tipo());
+        campo.setActivo(command.activo());
+        campoDinamicoRepository.save(campo);
+    }
+
+    @Override
+    public void deleteCampoDinamico(Long id) {
+        campoDinamicoRepository.deleteById(id);
     }
 
     @Override

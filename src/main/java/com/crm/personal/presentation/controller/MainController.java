@@ -41,6 +41,7 @@ public class MainController {
     @FXML private RadioButton        radioAnd;
     @FXML private RadioButton        radioOr;
     @FXML private Button             btnNuevaEtiqueta;
+    @FXML private Button             btnGestionarCampos;
 
     // ── Panel central ──────────────────────────────────────────────────────
     @FXML private TextField          searchField;
@@ -387,6 +388,10 @@ public class MainController {
     @FXML public void handleNuevaEtiqueta() {
         stageManager.openModal(FxmlView.ETIQUETA_MANAGER);
         cargarEtiquetas();
+    }
+
+    @FXML public void handleGestionarCampos() {
+        stageManager.openModal(FxmlView.CAMPO_MANAGER);
     }
 
     @FXML public void handleAgregarNota() {

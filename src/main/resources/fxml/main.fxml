@@ -60,6 +60,10 @@
                         onAction="#handleNuevaEtiqueta" maxWidth="Infinity"
                         styleClass="btn-primary"
                         style="-fx-background-radius:8; -fx-padding:10 16;"/>
+                <Button fx:id="btnGestionarCampos" text="Gestionar Campos"
+                        onAction="#handleGestionarCampos" maxWidth="Infinity"
+                        style="-fx-background-color:#f4f4ef; -fx-text-fill:#2c2c2c;
+                               -fx-background-radius:8; -fx-padding:10 16; -fx-cursor:hand;"/>
             </VBox>
 
             <!-- PANEL CENTRAL: Lista de contactos ──────────────────────── -->
