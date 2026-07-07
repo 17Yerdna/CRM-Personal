@@ -7,61 +7,67 @@
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.crm.personal.presentation.controller.EtiquetaManagerController"
       spacing="16"
-      style="-fx-background-color:#1e1e2e; -fx-padding:20;"
+      style="-fx-background-color:#fafaf5; -fx-padding:20;"
       prefWidth="560" prefHeight="480">
 
     <!-- Panel izquierdo: árbol -->
     <VBox spacing="8" prefWidth="220"
-          style="-fx-background-color:#2a2a3e; -fx-background-radius:8; -fx-padding:14;">
+          style="-fx-background-color:#ffffff; -fx-background-radius:12;
+                 -fx-border-color:#e8e4df; -fx-border-radius:12; -fx-border-width:1;
+                 -fx-padding:16;">
         <Label text="Etiquetas existentes"
-               style="-fx-font-weight:bold; -fx-text-fill:#a78bfa;"/>
+               style="-fx-font-weight:600; -fx-text-fill:#5c7a5f; -fx-font-size:14px;"/>
         <TreeView fx:id="etiquetasTree" VBox.vgrow="ALWAYS"
-                  style="-fx-background-color:#2a2a3e; -fx-border-color:transparent;"/>
+                  style="-fx-background-color:#ffffff; -fx-border-color:transparent;"/>
         <HBox spacing="6">
             <Button fx:id="btnNueva" text="+ Nueva"
                     onAction="#handleNueva" HBox.hgrow="ALWAYS"
-                    style="-fx-background-color:#6c63ff; -fx-text-fill:white;
-                           -fx-background-radius:4; -fx-cursor:hand; -fx-padding:7;"/>
-            <Button fx:id="btnEliminar" text="&#128465;&#65039;"
+                    styleClass="btn-primary"
+                    style="-fx-background-radius:8; -fx-padding:8 16;"/>
+            <Button fx:id="btnEliminar" text="Eliminar"
                     onAction="#handleEliminar"
-                    style="-fx-background-color:#3e1e1e; -fx-text-fill:#ff8080;
-                           -fx-background-radius:4; -fx-cursor:hand; -fx-padding:7 10;"/>
+                    style="-fx-background-color:#ffdad6; -fx-text-fill:#ba1a1a;
+                           -fx-background-radius:8; -fx-cursor:hand; -fx-padding:8 12;"/>
         </HBox>
     </VBox>
 
     <!-- Panel derecho: formulario -->
     <VBox spacing="14" HBox.hgrow="ALWAYS"
-          style="-fx-background-color:#2a2a3e; -fx-background-radius:8; -fx-padding:20;">
+          style="-fx-background-color:#ffffff; -fx-background-radius:12;
+                 -fx-border-color:#e8e4df; -fx-border-radius:12; -fx-border-width:1;
+                 -fx-padding:24;">
         <Label text="Editar etiqueta"
-               style="-fx-font-weight:bold; -fx-text-fill:#a78bfa; -fx-font-size:14px;"/>
+               style="-fx-font-weight:600; -fx-text-fill:#5c7a5f; -fx-font-size:14px;"/>
         <Separator/>
 
-        <Label text="Nombre:" style="-fx-text-fill:#c0c0d0;"/>
+        <Label text="Nombre:" style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
         <TextField fx:id="nombreField" promptText="Nombre de la etiqueta"
-                   style="-fx-background-color:#3d3d5c; -fx-text-fill:white;
-                          -fx-border-color:#4a4a6a; -fx-border-radius:4;
-                          -fx-background-radius:4; -fx-padding:8 10;"/>
+                   style="-fx-background-color:#ffffff; -fx-text-fill:#2c2c2c;
+                          -fx-border-color:#e8e4df; -fx-border-radius:8;
+                          -fx-background-radius:8; -fx-padding:10 12;"/>
 
-        <Label text="Color:" style="-fx-text-fill:#c0c0d0;"/>
+        <Label text="Color:" style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
         <ColorPicker fx:id="colorPicker" maxWidth="Infinity"
-                     style="-fx-background-color:#3d3d5c; -fx-background-radius:4;"/>
+                     style="-fx-background-color:#ffffff; -fx-background-radius:8;
+                            -fx-border-color:#e8e4df; -fx-border-radius:8;"/>
 
-        <Label text="Etiqueta padre (opcional):" style="-fx-text-fill:#c0c0d0;"/>
+        <Label text="Etiqueta padre (opcional):" style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
         <ComboBox fx:id="padreCombo" maxWidth="Infinity"
                   promptText="Sin padre (raíz)"
-                  style="-fx-background-color:#3d3d5c; -fx-background-radius:4;"/>
+                  style="-fx-background-color:#ffffff; -fx-background-radius:8;
+                         -fx-border-color:#e8e4df; -fx-border-radius:8;"/>
 
         <Region VBox.vgrow="ALWAYS"/>
 
         <HBox spacing="8" alignment="CENTER_RIGHT">
-            <Button text="&#10005; Cerrar"
+            <Button text="Cerrar"
                     onAction="#handleCerrar"
-                    style="-fx-background-color:#3d3d5c; -fx-text-fill:#c0c0e0;
-                           -fx-background-radius:4; -fx-cursor:hand; -fx-padding:8 16;"/>
-            <Button fx:id="btnGuardar" text="&#128190; Guardar"
+                    style="-fx-background-color:#f4f4ef; -fx-text-fill:#2c2c2c;
+                           -fx-background-radius:8; -fx-cursor:hand; -fx-padding:8 16;"/>
+            <Button fx:id="btnGuardar" text="Guardar"
                     onAction="#handleGuardar"
-                    style="-fx-background-color:#6c63ff; -fx-text-fill:white;
-                           -fx-font-weight:bold; -fx-background-radius:4;
+                    styleClass="btn-primary"
+                    style="-fx-font-weight:600; -fx-background-radius:8;
                            -fx-cursor:hand; -fx-padding:8 20;"/>
         </HBox>
     </VBox>

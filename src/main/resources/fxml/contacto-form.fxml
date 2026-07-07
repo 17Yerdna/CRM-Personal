@@ -8,19 +8,21 @@
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.crm.personal.presentation.controller.ContactoFormController"
-            style="-fx-background:#1e1e2e; -fx-background-color:#1e1e2e;"
+            style="-fx-background:#fafaf5; -fx-background-color:#fafaf5;"
             prefWidth="620" prefHeight="740">
 
-    <VBox spacing="16" style="-fx-background-color:#1e1e2e; -fx-padding:24;">
+    <VBox spacing="16" style="-fx-background-color:#ffffff; -fx-padding:24;">
 
         <Label fx:id="tituloLabel" text="Nuevo Contacto"
-               style="-fx-font-size:20px; -fx-font-weight:bold; -fx-text-fill:#a78bfa;"/>
+               style="-fx-font-size:18px; -fx-font-weight:600; -fx-text-fill:#5c7a5f;"/>
 
         <!-- Sección: Datos principales -->
         <VBox spacing="6"
-              style="-fx-background-color:#2a2a3e; -fx-background-radius:8; -fx-padding:16;">
+              style="-fx-background-color:#ffffff; -fx-background-radius:12;
+                     -fx-border-color:#e8e4df; -fx-border-radius:12; -fx-border-width:1;
+                     -fx-padding:24;">
             <Label text="Datos Principales"
-                   style="-fx-font-weight:bold; -fx-text-fill:#a78bfa; -fx-font-size:11px;"/>
+                   style="-fx-font-weight:600; -fx-text-fill:#5c7a5f; -fx-font-size:14px;"/>
             <Separator/>
             <GridPane hgap="12" vgap="10">
                 <columnConstraints>
@@ -29,79 +31,86 @@
                 </columnConstraints>
 
                 <Label text="Nombre *" GridPane.columnIndex="0" GridPane.rowIndex="0"
-                       style="-fx-text-fill:#c0c0d0;"/>
+                       style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                 <TextField fx:id="nombreField" promptText="Nombre completo"
                            GridPane.columnIndex="1" GridPane.rowIndex="0"
-                           style="-fx-background-color:#3d3d5c; -fx-text-fill:white;
-                                  -fx-border-color:#4a4a6a; -fx-border-radius:4;
-                                  -fx-background-radius:4; -fx-padding:7 10;"/>
+                           style="-fx-background-color:#ffffff; -fx-text-fill:#2c2c2c;
+                                  -fx-border-color:#e8e4df; -fx-border-radius:8;
+                                  -fx-background-radius:8; -fx-padding:10 12;"/>
 
                 <Label text="DNI * (8 dígitos)" GridPane.columnIndex="0" GridPane.rowIndex="1"
-                       style="-fx-text-fill:#c0c0d0;"/>
+                       style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                 <TextField fx:id="dniField" promptText="12345678"
                            GridPane.columnIndex="1" GridPane.rowIndex="1"
                            maxWidth="140"
-                           style="-fx-background-color:#3d3d5c; -fx-text-fill:white;
-                                  -fx-border-color:#4a4a6a; -fx-border-radius:4;
-                                  -fx-background-radius:4; -fx-padding:7 10;"/>
+                           style="-fx-background-color:#ffffff; -fx-text-fill:#2c2c2c;
+                                  -fx-border-color:#e8e4df; -fx-border-radius:8;
+                                  -fx-background-radius:8; -fx-padding:10 12;"/>
 
                 <Label text="Dirección *" GridPane.columnIndex="0" GridPane.rowIndex="2"
-                       style="-fx-text-fill:#c0c0d0;"/>
+                       style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                 <TextField fx:id="direccionField" promptText="Av. Ejemplo 123, Ciudad"
                            GridPane.columnIndex="1" GridPane.rowIndex="2"
-                           style="-fx-background-color:#3d3d5c; -fx-text-fill:white;
-                                  -fx-border-color:#4a4a6a; -fx-border-radius:4;
-                                  -fx-background-radius:4; -fx-padding:7 10;"/>
+                           style="-fx-background-color:#ffffff; -fx-text-fill:#2c2c2c;
+                                  -fx-border-color:#e8e4df; -fx-border-radius:8;
+                                  -fx-background-radius:8; -fx-padding:10 12;"/>
 
                 <Label text="Foto de perfil" GridPane.columnIndex="0" GridPane.rowIndex="3"
-                       style="-fx-text-fill:#c0c0d0;"/>
+                       style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                 <HBox spacing="12" GridPane.columnIndex="1" GridPane.rowIndex="3">
                     <ImageView fx:id="fotoPreview" fitWidth="70" fitHeight="70"
                                preserveRatio="true"
-                               style="-fx-effect:dropshadow(gaussian,#6c63ff,6,0.3,0,0);"/>
+                               style="-fx-effect:dropshadow(gaussian,rgba(122,158,126,0.2),6,0.3,0,0);
+                                      -fx-background-radius:999;"/>
                     <Button fx:id="btnSeleccionarFoto" text="Seleccionar foto"
                             onAction="#handleSeleccionarFoto"
-                            style="-fx-background-color:#3d3d5c; -fx-text-fill:#c0c0e0;
-                                   -fx-background-radius:4; -fx-cursor:hand;"/>
+                            style="-fx-background-color:#f4f4ef; -fx-text-fill:#2c2c2c;
+                                   -fx-background-radius:8; -fx-cursor:hand; -fx-padding:8 16;"/>
                 </HBox>
             </GridPane>
         </VBox>
 
         <!-- Sección: Etiquetas -->
         <VBox spacing="6"
-              style="-fx-background-color:#2a2a3e; -fx-background-radius:8; -fx-padding:16;">
+              style="-fx-background-color:#ffffff; -fx-background-radius:12;
+                     -fx-border-color:#e8e4df; -fx-border-radius:12; -fx-border-width:1;
+                     -fx-padding:24;">
             <Label text="Etiquetas"
-                   style="-fx-font-weight:bold; -fx-text-fill:#a78bfa; -fx-font-size:11px;"/>
+                   style="-fx-font-weight:600; -fx-text-fill:#5c7a5f; -fx-font-size:14px;"/>
             <Separator/>
             <HBox spacing="10" alignment="CENTER">
                 <VBox spacing="4" HBox.hgrow="ALWAYS">
-                    <Label text="Disponibles" style="-fx-text-fill:#9090b0; -fx-font-size:11px;"/>
+                    <Label text="Disponibles" style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                     <ListView fx:id="etiquetasDisponibles" prefHeight="120"
-                              style="-fx-background-color:#3d3d5c;"/>
+                              style="-fx-background-color:#ffffff; -fx-border-color:#e8e4df;
+                                     -fx-border-radius:8; -fx-background-radius:8;"/>
                 </VBox>
                 <VBox spacing="8" alignment="CENTER">
                     <Button fx:id="btnAsignarEtiqueta" text=" >> "
                             onAction="#handleAsignarEtiqueta"
-                            style="-fx-background-color:#6c63ff; -fx-text-fill:white;
-                                   -fx-background-radius:4; -fx-cursor:hand;"/>
+                            styleClass="btn-primary"
+                            style="-fx-background-radius:8; -fx-cursor:hand;"/>
                     <Button fx:id="btnQuitarEtiqueta" text=" &lt;&lt; "
                             onAction="#handleQuitarEtiqueta"
-                            style="-fx-background-color:#3d3d5c; -fx-text-fill:#c0c0e0;
-                                   -fx-background-radius:4; -fx-cursor:hand;"/>
+                            style="-fx-background-color:#f4f4ef; -fx-text-fill:#2c2c2c;
+                                   -fx-background-radius:8; -fx-cursor:hand;"/>
                 </VBox>
                 <VBox spacing="4" HBox.hgrow="ALWAYS">
-                    <Label text="Asignadas" style="-fx-text-fill:#9090b0; -fx-font-size:11px;"/>
+                    <Label text="Asignadas" style="-fx-text-fill:#6b6b6b; -fx-font-size:11px;"/>
                     <ListView fx:id="etiquetasSeleccionadas" prefHeight="120"
-                              style="-fx-background-color:#3d3d5c;"/>
+                              style="-fx-background-color:#ffffff; -fx-border-color:#e8e4df;
+                                     -fx-border-radius:8; -fx-background-radius:8;"/>
                 </VBox>
             </HBox>
         </VBox>
 
         <!-- Sección: Campos personalizados -->
         <VBox spacing="6"
-              style="-fx-background-color:#2a2a3e; -fx-background-radius:8; -fx-padding:16;">
+              style="-fx-background-color:#ffffff; -fx-background-radius:12;
+                     -fx-border-color:#e8e4df; -fx-border-radius:12; -fx-border-width:1;
+                     -fx-padding:24;">
             <Label text="Campos Personalizados"
-                   style="-fx-font-weight:bold; -fx-text-fill:#a78bfa; -fx-font-size:11px;"/>
+                   style="-fx-font-weight:600; -fx-text-fill:#5c7a5f; -fx-font-size:14px;"/>
             <Separator/>
             <GridPane fx:id="camposDinamicosGrid" hgap="12" vgap="8">
                 <columnConstraints>
@@ -115,13 +124,13 @@
         <HBox spacing="12" alignment="CENTER_RIGHT">
             <Button fx:id="btnCancelar" text="Cancelar"
                     onAction="#handleCancelar"
-                    style="-fx-background-color:#3d3d5c; -fx-text-fill:#c0c0e0;
-                           -fx-background-radius:4; -fx-cursor:hand; -fx-padding:9 20;"/>
-            <Button fx:id="btnGuardar" text="&#128190; Guardar"
+                    style="-fx-background-color:#f4f4ef; -fx-text-fill:#2c2c2c;
+                           -fx-background-radius:8; -fx-cursor:hand; -fx-padding:10 20;"/>
+            <Button fx:id="btnGuardar" text="Guardar"
                     onAction="#handleGuardar"
-                    style="-fx-background-color:#6c63ff; -fx-text-fill:white;
-                           -fx-font-weight:bold; -fx-background-radius:4;
-                           -fx-cursor:hand; -fx-padding:9 24;"/>
+                    styleClass="btn-primary"
+                    style="-fx-font-weight:600; -fx-background-radius:8;
+                           -fx-cursor:hand; -fx-padding:10 24;"/>
         </HBox>
     </VBox>
 </ScrollPane>
