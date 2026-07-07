@@ -2,7 +2,6 @@ package com.crm.personal.application.service;
 
 import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
-import com.crm.personal.application.dto.ContactoDTO;
 import com.crm.personal.application.dto.ImportResultDTO;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
@@ -434,19 +433,14 @@ public class ExportImportService {
                     if (!val.isBlank()) camposMap.put(e.getValue().getId(), val);
                 }
 
-                ContactoDTO dto = ContactoDTO.builder()
-                    .nombre(nombre).dni(dni).direccion(direccion)
-                    .camposDinamicos(camposMap)
-                    .build();
-
                 try {
                     createContactUseCase.create(new CreateContactCommand(
-                        dto.getNombre(),
-                        dto.getDni(),
-                        dto.getDireccion(),
-                        dto.getFotoPerfilPath(),
-                        dto.getEtiquetaIds(),
-                        dto.getCamposDinamicos()
+                        nombre,
+                        dni,
+                        direccion,
+                        null,
+                        null,
+                        camposMap
                     ));
                     resultado.addImportado();
                 } catch (IllegalArgumentException ex) {

@@ -2,7 +2,6 @@ package com.crm.personal.presentation;
 
 public enum FxmlView {
 
-    LOGIN("/fxml/login.fxml",                   "CRM Personal — Acceso"),
     MAIN("/fxml/main.fxml",                     "CRM Personal"),
     CONTACTO_FORM("/fxml/contacto-form.fxml",   "Gestionar Contacto"),
     ETIQUETA_MANAGER("/fxml/etiqueta-manager.fxml", "Gestionar Etiquetas");
