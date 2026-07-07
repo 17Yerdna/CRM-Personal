@@ -34,4 +34,14 @@ class DomainIsolationTest {
                     "..infrastructure..",
                     "..presentation.."
             );
+
+    @ArchTest
+    static final ArchRule presentation_must_not_depend_on_infrastructure = noClasses()
+            .that().resideInAPackage("..presentation..")
+            .should().dependOnClassesThat().resideInAnyPackage("..infrastructure..");
+
+    @ArchTest
+    static final ArchRule infrastructure_must_not_depend_on_presentation = noClasses()
+            .that().resideInAPackage("..infrastructure..")
+            .should().dependOnClassesThat().resideInAnyPackage("..presentation..");
 }
