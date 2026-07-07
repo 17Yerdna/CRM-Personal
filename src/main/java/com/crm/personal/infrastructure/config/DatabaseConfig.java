@@ -64,7 +64,10 @@ public class DatabaseConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
         em.setDataSource(dataSource);
-        em.setPackagesToScan("com.crm.personal.infrastructure.persistence.model");
+        em.setPackagesToScan(
+            "com.crm.personal.infrastructure.persistence.model",
+            "com.crm.personal.infrastructure.persistence.converter"
+        );
 
         HibernateJpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(adapter);
