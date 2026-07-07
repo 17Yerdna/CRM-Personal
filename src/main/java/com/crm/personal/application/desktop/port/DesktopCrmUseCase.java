@@ -1,11 +1,13 @@
 package com.crm.personal.application.desktop.port;
 
+import com.crm.personal.application.desktop.command.DesktopCrearRelacionCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveCampoDinamicoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveContactoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveMediaCommand;
 import com.crm.personal.application.desktop.dto.DesktopCampoDinamicoDto;
 import com.crm.personal.application.desktop.dto.DesktopContactoDto;
+import com.crm.personal.application.desktop.dto.DesktopContactoRelacionDto;
 import com.crm.personal.application.desktop.dto.DesktopEtiquetaDto;
 import com.crm.personal.application.desktop.dto.DesktopTimelineRecordDto;
 import com.crm.personal.application.dto.ImportResultDTO;
@@ -40,4 +42,8 @@ public interface DesktopCrmUseCase {
     byte[] exportContactToPdf(Long contactId) throws IOException;
     byte[] generateExcelTemplate() throws IOException;
     ImportResultDTO importFromExcel(InputStream inputStream);
+
+    List<DesktopContactoRelacionDto> getRelaciones(Long contactoId);
+    void crearRelacion(DesktopCrearRelacionCommand command);
+    void eliminarRelacion(Long relacionId);
 }

@@ -4,6 +4,7 @@ import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.command.UpdateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
 import com.crm.personal.application.contact.port.UpdateContactUseCase;
+import com.crm.personal.application.desktop.command.DesktopCrearRelacionCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveCampoDinamicoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveContactoCommand;
 import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
@@ -14,6 +15,7 @@ import com.crm.personal.application.dto.EtiquetaDTO;
 import com.crm.personal.application.dto.ImportResultDTO;
 import com.crm.personal.infrastructure.persistence.model.*;
 import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
+import com.crm.personal.infrastructure.persistence.repository.ContactoRelacionRepository;
 import org.hibernate.Hibernate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
     private final TimelineService timelineService;
     private final ExportImportService exportImportService;
     private final CampoDinamicoRepository campoDinamicoRepository;
+    private final ContactoRelacionRepository relacionRepository;
     private final CreateContactUseCase createContactUseCase;
     private final UpdateContactUseCase updateContactUseCase;
 
@@ -41,6 +44,7 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
             TimelineService timelineService,
             ExportImportService exportImportService,
             CampoDinamicoRepository campoDinamicoRepository,
+            ContactoRelacionRepository relacionRepository,
             CreateContactUseCase createContactUseCase,
             UpdateContactUseCase updateContactUseCase
     ) {
@@ -49,6 +53,7 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
         this.timelineService = timelineService;
         this.exportImportService = exportImportService;
         this.campoDinamicoRepository = campoDinamicoRepository;
+        this.relacionRepository = relacionRepository;
         this.createContactUseCase = createContactUseCase;
         this.updateContactUseCase = updateContactUseCase;
     }
@@ -187,6 +192,67 @@ public class DesktopCrmAdapter implements DesktopCrmUseCase {
     @Override
     public ImportResultDTO importFromExcel(InputStream inputStream) {
         return exportImportService.importarDesdeExcel(inputStream);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<DesktopContactoRelacionDto> getRelaciones(Long contactoId) {
+        return relacionRepository.findByContactoId(contactoId).stream()
+                .map(relacion -> {
+                    Contacto relacionado;
+                    if (relacion.getContactoOrigen().getId().equals(contactoId)) {
+                        relacionado = relacion.getContactoDestino();
+                    } else {
+                        relacionado = relacion.getContactoOrigen();
+                    }
+                    return new DesktopContactoRelacionDto(
+                            relacion.getId(),
+                            relacionado.getId(),
+                            relacionado.getNombre(),
+                            relacion.getTipoRelacion(),
+                            relacion.getDescripcion()
+                    );
+                })
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void crearRelacion(DesktopCrearRelacionCommand command) {
+        Contacto origen = contactoService.findById(command.origenId());
+        Contacto destino = contactoService.findById(command.destinoId());
+
+        // Crear relación origen -> destino
+        ContactoRelacion relacion1 = ContactoRelacion.builder()
+                .contactoOrigen(origen)
+                .contactoDestino(destino)
+                .tipoRelacion(command.tipoRelacion())
+                .descripcion(command.descripcion())
+                .build();
+        relacionRepository.save(relacion1);
+
+        // Crear relación destino -> origen (bidireccional)
+        ContactoRelacion relacion2 = ContactoRelacion.builder()
+                .contactoOrigen(destino)
+                .contactoDestino(origen)
+                .tipoRelacion(command.tipoRelacion())
+                .descripcion(command.descripcion())
+                .build();
+        relacionRepository.save(relacion2);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarRelacion(Long relacionId) {
+        ContactoRelacion relacion = relacionRepository.findById(relacionId)
+                .orElseThrow(() -> new IllegalArgumentException("Relación no encontrada: " + relacionId));
+
+        Long origenId = relacion.getContactoOrigen().getId();
+        Long destinoId = relacion.getContactoDestino().getId();
+
+        // Eliminar ambas direcciones
+        relacionRepository.deleteByContactoOrigenIdAndContactoDestinoId(origenId, destinoId);
+        relacionRepository.deleteByContactoOrigenIdAndContactoDestinoId(destinoId, origenId);
     }
 
     private DesktopContactoDto toContactDto(Contacto contacto) {
