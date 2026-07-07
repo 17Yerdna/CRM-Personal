@@ -1,8 +1,9 @@
 package com.crm.personal.presentation.controller;
 
 import com.crm.personal.application.dto.EtiquetaDTO;
-import com.crm.personal.infrastructure.legacy.EtiquetaService;
-import com.crm.personal.infrastructure.persistence.model.Etiqueta;
+import com.crm.personal.application.desktop.command.DesktopSaveEtiquetaCommand;
+import com.crm.personal.application.desktop.dto.DesktopEtiquetaDto;
+import com.crm.personal.application.desktop.port.DesktopCrmUseCase;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
@@ -16,19 +17,19 @@ import java.util.List;
 @Scope("prototype")
 public class EtiquetaManagerController {
 
-    @FXML private TreeView<Etiqueta>    etiquetasTree;
+    @FXML private TreeView<DesktopEtiquetaDto> etiquetasTree;
     @FXML private TextField             nombreField;
     @FXML private ColorPicker           colorPicker;
-    @FXML private ComboBox<Etiqueta>    padreCombo;
+    @FXML private ComboBox<DesktopEtiquetaDto> padreCombo;
     @FXML private Button                btnGuardar;
     @FXML private Button                btnEliminar;
     @FXML private Button                btnNueva;
 
-    private final EtiquetaService etiquetaService;
-    private Etiqueta etiquetaSeleccionada;
+    private final DesktopCrmUseCase desktopCrm;
+    private DesktopEtiquetaDto etiquetaSeleccionada;
 
-    public EtiquetaManagerController(EtiquetaService etiquetaService) {
-        this.etiquetaService = etiquetaService;
+    public EtiquetaManagerController(DesktopCrmUseCase desktopCrm) {
+        this.desktopCrm = desktopCrm;
     }
 
     @FXML
@@ -49,15 +50,15 @@ public class EtiquetaManagerController {
     private void configurarTreeView() {
         etiquetasTree.setCellFactory(tv -> new TreeCell<>() {
             @Override
-            protected void updateItem(Etiqueta item, boolean empty) {
+            protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setStyle("");
                 } else {
-                    setText(item.getNombre());
-                    setStyle(item.getColorHex() != null
-                        ? "-fx-text-fill: " + item.getColorHex() + ";"
+                    setText(item.nombre());
+                    setStyle(item.colorHex() != null
+                        ? "-fx-text-fill: " + item.colorHex() + ";"
                         : "");
                 }
             }
@@ -67,25 +68,25 @@ public class EtiquetaManagerController {
     private void configurarComboBox() {
         padreCombo.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(Etiqueta item, boolean empty) {
+            protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getNombre());
+                setText(empty || item == null ? null : item.nombre());
             }
         });
         padreCombo.setButtonCell(new ListCell<>() {
             @Override
-            protected void updateItem(Etiqueta item, boolean empty) {
+            protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "Sin padre (raíz)" : item.getNombre());
+                setText(empty || item == null ? "Sin padre (raíz)" : item.nombre());
             }
         });
     }
 
     private void cargarDatos() {
         // Árbol
-        TreeItem<Etiqueta> root = new TreeItem<>();
+        TreeItem<DesktopEtiquetaDto> root = new TreeItem<>();
         root.setExpanded(true);
-        for (Etiqueta e : etiquetaService.findRoots()) {
+        for (DesktopEtiquetaDto e : desktopCrm.findRootTags()) {
             root.getChildren().add(buildTreeItem(e));
         }
         etiquetasTree.setRoot(root);
@@ -94,26 +95,29 @@ public class EtiquetaManagerController {
         // Combo padre
         padreCombo.getItems().clear();
         padreCombo.getItems().add(null);
-        padreCombo.getItems().addAll(etiquetaService.findAll());
+        padreCombo.getItems().addAll(desktopCrm.findAllTags());
     }
 
-    private TreeItem<Etiqueta> buildTreeItem(Etiqueta e) {
-        TreeItem<Etiqueta> item = new TreeItem<>(e);
+    private TreeItem<DesktopEtiquetaDto> buildTreeItem(DesktopEtiquetaDto e) {
+        TreeItem<DesktopEtiquetaDto> item = new TreeItem<>(e);
         item.setExpanded(true);
-        for (Etiqueta hijo : e.getHijos()) {
+        for (DesktopEtiquetaDto hijo : e.hijos()) {
             item.getChildren().add(buildTreeItem(hijo));
         }
         return item;
     }
 
-    private void cargarEnFormulario(Etiqueta etiqueta) {
+    private void cargarEnFormulario(DesktopEtiquetaDto etiqueta) {
         etiquetaSeleccionada = etiqueta;
-        nombreField.setText(etiqueta.getNombre());
-        if (etiqueta.getColorHex() != null) {
-            try { colorPicker.setValue(Color.web(etiqueta.getColorHex())); }
+        nombreField.setText(etiqueta.nombre());
+        if (etiqueta.colorHex() != null) {
+            try { colorPicker.setValue(Color.web(etiqueta.colorHex())); }
             catch (Exception ignored) {}
         }
-        padreCombo.setValue(etiqueta.getPadre());
+        padreCombo.getItems().stream()
+            .filter(item -> item != null && item.id().equals(etiqueta.padreId()))
+            .findFirst()
+            .ifPresentOrElse(padreCombo::setValue, () -> padreCombo.setValue(null));
         btnEliminar.setDisable(false);
     }
 
@@ -138,14 +142,13 @@ public class EtiquetaManagerController {
         String hex = String.format("#%02X%02X%02X",
             (int)(c.getRed() * 255), (int)(c.getGreen() * 255), (int)(c.getBlue() * 255));
 
-        EtiquetaDTO dto = EtiquetaDTO.builder()
-            .id(etiquetaSeleccionada != null ? etiquetaSeleccionada.getId() : null)
-            .nombre(nombre).colorHex(hex)
-            .padreId(padreCombo.getValue() != null ? padreCombo.getValue().getId() : null)
-            .build();
-
         try {
-            etiquetaService.save(dto);
+            desktopCrm.saveTag(new DesktopSaveEtiquetaCommand(
+                etiquetaSeleccionada != null ? etiquetaSeleccionada.id() : null,
+                nombre,
+                hex,
+                padreCombo.getValue() != null ? padreCombo.getValue().id() : null
+            ));
             cargarDatos();
             handleNueva();
         } catch (Exception e) {
@@ -157,12 +160,12 @@ public class EtiquetaManagerController {
     public void handleEliminar() {
         if (etiquetaSeleccionada == null) return;
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-            "¿Eliminar '" + etiquetaSeleccionada.getNombre() + "'?");
+            "¿Eliminar '" + etiquetaSeleccionada.nombre() + "'?");
         confirm.setHeaderText(null);
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
                 try {
-                    etiquetaService.delete(etiquetaSeleccionada.getId());
+                    desktopCrm.deleteTag(etiquetaSeleccionada.id());
                     cargarDatos();
                     handleNueva();
                 } catch (Exception e) {

@@ -4,9 +4,11 @@ import com.crm.personal.application.contact.command.CreateContactCommand;
 import com.crm.personal.application.contact.command.UpdateContactCommand;
 import com.crm.personal.application.contact.port.CreateContactUseCase;
 import com.crm.personal.application.contact.port.UpdateContactUseCase;
-import com.crm.personal.infrastructure.legacy.EtiquetaService;
-import com.crm.personal.infrastructure.persistence.model.*;
-import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
+import com.crm.personal.application.desktop.dto.DesktopCampoDinamicoDto;
+import com.crm.personal.application.desktop.dto.DesktopCampoValorDto;
+import com.crm.personal.application.desktop.dto.DesktopContactoDto;
+import com.crm.personal.application.desktop.dto.DesktopEtiquetaDto;
+import com.crm.personal.application.desktop.port.DesktopCrmUseCase;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -30,8 +32,8 @@ public class ContactoFormController {
     @FXML private TextField direccionField;
     @FXML private ImageView fotoPreview;
     @FXML private Button    btnSeleccionarFoto;
-    @FXML private ListView<Etiqueta> etiquetasDisponibles;
-    @FXML private ListView<Etiqueta> etiquetasSeleccionadas;
+    @FXML private ListView<DesktopEtiquetaDto> etiquetasDisponibles;
+    @FXML private ListView<DesktopEtiquetaDto> etiquetasSeleccionadas;
     @FXML private Button    btnAsignarEtiqueta;
     @FXML private Button    btnQuitarEtiqueta;
     @FXML private GridPane  camposDinamicosGrid;
@@ -40,10 +42,9 @@ public class ContactoFormController {
 
     private final CreateContactUseCase    createContactUseCase;
     private final UpdateContactUseCase    updateContactUseCase;
-    private final EtiquetaService         etiquetaService;
-    private final CampoDinamicoRepository campoDinamicoRepository;
+    private final DesktopCrmUseCase       desktopCrm;
 
-    private Contacto contactoExistente;
+    private DesktopContactoDto contactoExistente;
     private String   fotoPath;
     private final Map<Long, TextField> campoInputs = new LinkedHashMap<>();
 
@@ -52,12 +53,10 @@ public class ContactoFormController {
 
     public ContactoFormController(CreateContactUseCase createContactUseCase,
                                   UpdateContactUseCase updateContactUseCase,
-                                  EtiquetaService etiquetaService,
-                                  CampoDinamicoRepository campoDinamicoRepository) {
+                                  DesktopCrmUseCase desktopCrm) {
         this.createContactUseCase    = createContactUseCase;
         this.updateContactUseCase    = updateContactUseCase;
-        this.etiquetaService         = etiquetaService;
-        this.campoDinamicoRepository = campoDinamicoRepository;
+        this.desktopCrm              = desktopCrm;
     }
 
     @FXML
@@ -72,45 +71,45 @@ public class ContactoFormController {
         etiquetasSeleccionadas.setCellFactory(lv -> etiquetaCell());
     }
 
-    private ListCell<Etiqueta> etiquetaCell() {
+    private ListCell<DesktopEtiquetaDto> etiquetaCell() {
         return new ListCell<>() {
             @Override
-            protected void updateItem(Etiqueta item, boolean empty) {
+            protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setStyle("");
                 } else {
-                    setText(item.getNombre());
-                    setStyle(item.getColorHex() != null
-                        ? "-fx-text-fill: " + item.getColorHex() + ";" : "");
+                    setText(item.nombre());
+                    setStyle(item.colorHex() != null
+                        ? "-fx-text-fill: " + item.colorHex() + ";" : "");
                 }
             }
         };
     }
 
     private void cargarEtiquetasDisponibles() {
-        etiquetasDisponibles.getItems().setAll(etiquetaService.findAll());
+        etiquetasDisponibles.getItems().setAll(desktopCrm.findAllTags());
     }
 
     private void cargarCamposDinamicos() {
         campoInputs.clear();
         camposDinamicosGrid.getChildren().clear();
-        List<CampoDinamico> campos = campoDinamicoRepository.findByActivoTrue();
+        List<DesktopCampoDinamicoDto> campos = desktopCrm.findActiveFields();
         for (int i = 0; i < campos.size(); i++) {
-            CampoDinamico campo = campos.get(i);
-            Label lbl = new Label(campo.getNombre() + ":");
+            DesktopCampoDinamicoDto campo = campos.get(i);
+            Label lbl = new Label(campo.nombre() + ":");
             lbl.setStyle("-fx-text-fill:#c0c0d0;");
             TextField tf = new TextField();
-            tf.setPromptText("Ingresa " + campo.getNombre());
+            tf.setPromptText("Ingresa " + campo.nombre());
             tf.setStyle("-fx-background-color:#3d3d5c;-fx-text-fill:white;-fx-background-radius:4;");
             camposDinamicosGrid.add(lbl, 0, i);
             camposDinamicosGrid.add(tf, 1, i);
-            campoInputs.put(campo.getId(), tf);
+            campoInputs.put(campo.id(), tf);
         }
     }
 
-    public void setContacto(Contacto contacto) {
+    public void setContacto(DesktopContactoDto contacto) {
         this.contactoExistente = contacto;
         if (contacto != null) rellenarFormulario(contacto);
     }
@@ -119,23 +118,23 @@ public class ContactoFormController {
         this.onSuccess = callback;
     }
 
-    private void rellenarFormulario(Contacto c) {
+    private void rellenarFormulario(DesktopContactoDto c) {
         tituloLabel.setText("Editar Contacto");
-        nombreField.setText(c.getNombre());
-        dniField.setText(c.getDni());
-        direccionField.setText(c.getDireccion());
-        fotoPath = c.getFotoPerfilPath();
+        nombreField.setText(c.nombre());
+        dniField.setText(c.dni());
+        direccionField.setText(c.direccion());
+        fotoPath = c.fotoPerfilPath();
         if (fotoPath != null) {
             try { fotoPreview.setImage(new Image("file:" + fotoPath)); }
             catch (Exception ignored) {}
         }
         // Etiquetas
-        etiquetasSeleccionadas.getItems().setAll(c.getEtiquetas());
-        etiquetasDisponibles.getItems().removeAll(c.getEtiquetas());
+        etiquetasSeleccionadas.getItems().setAll(c.etiquetas());
+        etiquetasDisponibles.getItems().removeAll(c.etiquetas());
         // Campos dinámicos
-        for (CampoDinamicoValor v : c.getCamposDinamicos()) {
-            TextField tf = campoInputs.get(v.getCampo().getId());
-            if (tf != null) tf.setText(v.getValor());
+        for (DesktopCampoValorDto v : c.camposDinamicos()) {
+            TextField tf = campoInputs.get(v.campoId());
+            if (tf != null) tf.setText(v.valor());
         }
     }
 
@@ -154,7 +153,7 @@ public class ContactoFormController {
 
     @FXML
     public void handleAsignarEtiqueta() {
-        Etiqueta sel = etiquetasDisponibles.getSelectionModel().getSelectedItem();
+        DesktopEtiquetaDto sel = etiquetasDisponibles.getSelectionModel().getSelectedItem();
         if (sel != null) {
             etiquetasDisponibles.getItems().remove(sel);
             etiquetasSeleccionadas.getItems().add(sel);
@@ -163,7 +162,7 @@ public class ContactoFormController {
 
     @FXML
     public void handleQuitarEtiqueta() {
-        Etiqueta sel = etiquetasSeleccionadas.getSelectionModel().getSelectedItem();
+        DesktopEtiquetaDto sel = etiquetasSeleccionadas.getSelectionModel().getSelectedItem();
         if (sel != null) {
             etiquetasSeleccionadas.getItems().remove(sel);
             etiquetasDisponibles.getItems().add(sel);
@@ -186,7 +185,7 @@ public class ContactoFormController {
         }
 
         Set<Long> etiquetaIds = new HashSet<>();
-        etiquetasSeleccionadas.getItems().forEach(e -> etiquetaIds.add(e.getId()));
+        etiquetasSeleccionadas.getItems().forEach(e -> etiquetaIds.add(e.id()));
 
         Map<Long, String> camposMap = new HashMap<>();
         campoInputs.forEach((id, tf) -> {
@@ -196,7 +195,7 @@ public class ContactoFormController {
         try {
             if (contactoExistente != null) {
                 updateContactUseCase.update(new UpdateContactCommand(
-                    contactoExistente.getId(), nombre, dni, direccion, fotoPath, etiquetaIds, camposMap
+                    contactoExistente.id(), nombre, dni, direccion, fotoPath, etiquetaIds, camposMap
                 ));
             } else {
                 createContactUseCase.create(new CreateContactCommand(

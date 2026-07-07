@@ -1,10 +1,8 @@
 package com.crm.personal.presentation.controller;
 
-import com.crm.personal.application.dto.SearchCriteriaDTO;
-import com.crm.personal.application.dto.SearchOperator;
-import com.crm.personal.infrastructure.legacy.*;
-import com.crm.personal.infrastructure.persistence.model.*;
-import com.crm.personal.infrastructure.persistence.repository.CampoDinamicoRepository;
+import com.crm.personal.application.desktop.command.DesktopSaveMediaCommand;
+import com.crm.personal.application.desktop.dto.*;
+import com.crm.personal.application.desktop.port.DesktopCrmUseCase;
 import com.crm.personal.presentation.javafx.SpringFXMLLoader;
 import com.crm.personal.presentation.FxmlView;
 import com.crm.personal.presentation.StageManager;
@@ -39,14 +37,14 @@ public class MainController {
         DateTimeFormatter.ofPattern("dd/MM/yyyy  HH:mm");
 
     // ── Panel izquierdo ────────────────────────────────────────────────────
-    @FXML private TreeView<Etiqueta> etiquetasTreeView;
+    @FXML private TreeView<DesktopEtiquetaDto> etiquetasTreeView;
     @FXML private RadioButton        radioAnd;
     @FXML private RadioButton        radioOr;
     @FXML private Button             btnNuevaEtiqueta;
 
     // ── Panel central ──────────────────────────────────────────────────────
     @FXML private TextField          searchField;
-    @FXML private ListView<Contacto> contactosListView;
+    @FXML private ListView<DesktopContactoDto> contactosListView;
     @FXML private Label              lblContadorContactos;
     @FXML private Button             btnNuevoContacto;
     @FXML private Button             btnImportar;
@@ -67,28 +65,16 @@ public class MainController {
     @FXML private Button     btnEditarContacto;
     @FXML private Button     btnEliminarContacto;
 
-    private final ContactoService         contactoService;
-    private final EtiquetaService         etiquetaService;
-    private final ExportImportService     exportImportService;
-    private final TimelineService         timelineService;
-    private final CampoDinamicoRepository campoRepo;
+    private final DesktopCrmUseCase       desktopCrm;
     private final StageManager            stageManager;
     private final SpringFXMLLoader        springFXMLLoader;
 
-    private Contacto contactoActual;
+    private DesktopContactoDto contactoActual;
 
-    public MainController(ContactoService contactoService,
-                          EtiquetaService etiquetaService,
-                          ExportImportService exportImportService,
-                          TimelineService timelineService,
-                          CampoDinamicoRepository campoRepo,
+    public MainController(DesktopCrmUseCase desktopCrm,
                           StageManager stageManager,
                           SpringFXMLLoader springFXMLLoader) {
-        this.contactoService     = contactoService;
-        this.etiquetaService     = etiquetaService;
-        this.exportImportService = exportImportService;
-        this.timelineService     = timelineService;
-        this.campoRepo           = campoRepo;
+        this.desktopCrm          = desktopCrm;
         this.stageManager        = stageManager;
         this.springFXMLLoader    = springFXMLLoader;
     }
@@ -110,16 +96,16 @@ public class MainController {
     private void configurarListView() {
         contactosListView.setCellFactory(lv -> new ListCell<>() {
             @Override
-            protected void updateItem(Contacto item, boolean empty) {
+            protected void updateItem(DesktopContactoDto item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setGraphic(null);
                     setText(null);
                 } else {
                     VBox box  = new VBox(2);
-                    Label nom = new Label(item.getNombre());
+                    Label nom = new Label(item.nombre());
                     nom.setStyle("-fx-font-weight:bold; -fx-text-fill:#e0e0f0;");
-                    Label dni = new Label("DNI: " + item.getDni());
+                    Label dni = new Label("DNI: " + item.dni());
                     dni.setStyle("-fx-text-fill:#9090b0; -fx-font-size:11px;");
                     box.getChildren().addAll(nom, dni);
                     setGraphic(box);
@@ -131,7 +117,7 @@ public class MainController {
             (obs, old, sel) -> {
                 if (sel != null) {
                     // Cargar con colecciones inicializadas (evita LazyInitializationException)
-                    mostrarExpediente(contactoService.loadFull(sel.getId()));
+                    mostrarExpediente(desktopCrm.loadContact(sel.id()));
                 }
             });
     }
@@ -139,13 +125,13 @@ public class MainController {
     private void configurarTree() {
         etiquetasTreeView.setCellFactory(tv -> new TreeCell<>() {
             @Override
-            protected void updateItem(Etiqueta item, boolean empty) {
+            protected void updateItem(DesktopEtiquetaDto item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) { setText(null); setStyle(""); }
                 else {
-                    setText(item.getNombre());
-                    setStyle(item.getColorHex() != null
-                        ? "-fx-text-fill:" + item.getColorHex() + ";"
+                    setText(item.nombre());
+                    setStyle(item.colorHex() != null
+                        ? "-fx-text-fill:" + item.colorHex() + ";"
                         : "-fx-text-fill:#c0c0d0;");
                 }
             }
@@ -160,23 +146,23 @@ public class MainController {
     // ═══════════════════════════════════════════════════════════════
 
     private void cargarContactos() {
-        List<Contacto> todos = contactoService.findAll();
+        List<DesktopContactoDto> todos = desktopCrm.findAllContacts();
         contactosListView.getItems().setAll(todos);
         lblContadorContactos.setText(todos.size() + " contacto" + (todos.size() != 1 ? "s" : ""));
     }
 
     private void cargarEtiquetas() {
-        TreeItem<Etiqueta> root = new TreeItem<>();
+        TreeItem<DesktopEtiquetaDto> root = new TreeItem<>();
         root.setExpanded(true);
-        etiquetaService.findRoots().forEach(e -> root.getChildren().add(toTreeItem(e)));
+        desktopCrm.findRootTags().forEach(e -> root.getChildren().add(toTreeItem(e)));
         etiquetasTreeView.setRoot(root);
         etiquetasTreeView.setShowRoot(false);
     }
 
-    private TreeItem<Etiqueta> toTreeItem(Etiqueta e) {
-        TreeItem<Etiqueta> item = new TreeItem<>(e);
+    private TreeItem<DesktopEtiquetaDto> toTreeItem(DesktopEtiquetaDto e) {
+        TreeItem<DesktopEtiquetaDto> item = new TreeItem<>(e);
         item.setExpanded(true);
-        e.getHijos().forEach(hijo -> item.getChildren().add(toTreeItem(hijo)));
+        e.hijos().forEach(hijo -> item.getChildren().add(toTreeItem(hijo)));
         return item;
     }
 
@@ -184,17 +170,17 @@ public class MainController {
     // Expediente / Timeline
     // ═══════════════════════════════════════════════════════════════
 
-    private void mostrarExpediente(Contacto c) {
+    private void mostrarExpediente(DesktopContactoDto c) {
         this.contactoActual = c;
         expedientePanel.setVisible(true);
 
-        contactoNombreLabel.setText(c.getNombre());
-        contactoDniLabel.setText("DNI: " + c.getDni());
-        contactoDireccionLabel.setText("\uD83D\uDCCD " + c.getDireccion());
+        contactoNombreLabel.setText(c.nombre());
+        contactoDniLabel.setText("DNI: " + c.dni());
+        contactoDireccionLabel.setText("\uD83D\uDCCD " + c.direccion());
 
         // Foto de perfil
-        if (c.getFotoPerfilPath() != null) {
-            try { fotoPerfilView.setImage(new Image("file:" + c.getFotoPerfilPath())); }
+        if (c.fotoPerfilPath() != null) {
+            try { fotoPerfilView.setImage(new Image("file:" + c.fotoPerfilPath())); }
             catch (Exception e) { fotoPerfilView.setImage(null); }
         } else {
             fotoPerfilView.setImage(null);
@@ -202,11 +188,11 @@ public class MainController {
 
         // Campos dinámicos
         camposDinamicosBox.getChildren().clear();
-        for (CampoDinamicoValor v : c.getCamposDinamicos()) {
+        for (DesktopCampoValorDto v : c.camposDinamicos()) {
             HBox row = new HBox(8);
-            Label lbl = new Label(v.getCampo().getNombre() + ":");
+            Label lbl = new Label(v.campoNombre() + ":");
             lbl.setStyle("-fx-text-fill:#9090b0; -fx-min-width:120;");
-            Label val = new Label(v.getValor());
+            Label val = new Label(v.valor());
             val.setStyle("-fx-text-fill:#e0e0f0;");
             row.getChildren().addAll(lbl, val);
             camposDinamicosBox.getChildren().add(row);
@@ -214,9 +200,9 @@ public class MainController {
 
         // Chips de etiquetas
         etiquetasChips.getChildren().clear();
-        for (Etiqueta et : c.getEtiquetas()) {
-            Label chip = new Label(et.getNombre());
-            String bg  = et.getColorHex() != null ? et.getColorHex() : "#6C63FF";
+        for (DesktopEtiquetaDto et : c.etiquetas()) {
+            Label chip = new Label(et.nombre());
+            String bg  = et.colorHex() != null ? et.colorHex() : "#6C63FF";
             chip.setStyle(
                 "-fx-background-color:" + bg + "; -fx-text-fill:white; " +
                 "-fx-background-radius:12; -fx-padding:3 10; -fx-font-size:10px;");
@@ -226,9 +212,9 @@ public class MainController {
         renderTimeline(c);
     }
 
-    private void renderTimeline(Contacto c) {
+    private void renderTimeline(DesktopContactoDto c) {
         timelineContainer.getChildren().clear();
-        List<TimelineRecord> records = timelineService.getTimeline(c.getId());
+        List<DesktopTimelineRecordDto> records = desktopCrm.getTimeline(c.id());
 
         if (records.isEmpty()) {
             Label empty = new Label("Sin registros en el expediente.");
@@ -239,7 +225,7 @@ public class MainController {
         records.forEach(r -> timelineContainer.getChildren().add(crearCard(r)));
     }
 
-    private VBox crearCard(TimelineRecord record) {
+    private VBox crearCard(DesktopTimelineRecordDto record) {
         VBox card = new VBox(6);
         card.setStyle("-fx-background-color:#2a2a3e; -fx-background-radius:8; " +
                       "-fx-border-color:#3d3d5c; -fx-border-radius:8; " +
@@ -249,12 +235,12 @@ public class MainController {
         // Encabezado
         HBox header = new HBox(8);
         header.setAlignment(Pos.CENTER_LEFT);
-        String ico = record.getTipo() == TimelineRecordType.NOTA ? "\uD83D\uDCDD" : "\uD83D\uDDBC\uFE0F";
+        String ico = "NOTA".equals(record.tipo()) ? "\uD83D\uDCDD" : "\uD83D\uDDBC\uFE0F";
         Label icon  = new Label(ico); icon.setStyle("-fx-font-size:15px;");
-        Label title = new Label(record.getTitulo());
+        Label title = new Label(record.titulo());
         title.setStyle("-fx-font-weight:bold; -fx-text-fill:#e0e0f0; -fx-font-size:13px;");
         Region sp   = new Region(); HBox.setHgrow(sp, Priority.ALWAYS);
-        Label fecha = new Label(record.getFecha() != null ? record.getFecha().format(DATE_FMT) : "");
+        Label fecha = new Label(record.fecha() != null ? record.fecha().format(DATE_FMT) : "");
         fecha.setStyle("-fx-text-fill:#6060a0; -fx-font-size:10px;");
 
         Button btnE = iconBtn("\u270F\uFE0F", "-fx-text-fill:#a0a0c0;");
@@ -266,8 +252,8 @@ public class MainController {
         card.getChildren().add(header);
 
         // Contenido
-        if (record.getTipo() == TimelineRecordType.NOTA && record.getContenidoHtml() != null) {
-            String plain = record.getContenidoHtml().replaceAll("<[^>]+>","").replace("&nbsp;"," ").trim();
+        if ("NOTA".equals(record.tipo()) && record.contenidoHtml() != null) {
+            String plain = record.contenidoHtml().replaceAll("<[^>]+>","").replace("&nbsp;"," ").trim();
             Label contenido = new Label(plain);
             contenido.setStyle("-fx-text-fill:#c0c0d0; -fx-wrap-text:true;");
             contenido.setWrapText(true);
@@ -276,38 +262,38 @@ public class MainController {
         }
 
         // Galería multimedia
-        if (!record.getAdjuntos().isEmpty()) {
+        if (!record.adjuntos().isEmpty()) {
             FlowPane gallery = new FlowPane(8, 8);
-            record.getAdjuntos().forEach(adj -> gallery.getChildren().add(crearMiniMedia(adj)));
+            record.adjuntos().forEach(adj -> gallery.getChildren().add(crearMiniMedia(adj)));
             card.getChildren().add(gallery);
         }
         return card;
     }
 
-    private VBox crearMiniMedia(MediaAdjunto adj) {
+    private VBox crearMiniMedia(DesktopMediaAdjuntoDto adj) {
         VBox box = new VBox(4);
         box.setStyle("-fx-background-color:#1e1e2e; -fx-background-radius:6; -fx-padding:6;");
         box.setMaxWidth(130);
 
-        if (adj.getFilePath() != null) {
+        if (adj.filePath() != null) {
             try {
-                ImageView thumb = new ImageView(new Image("file:" + adj.getFilePath(), 120, 90, true, true));
+                ImageView thumb = new ImageView(new Image("file:" + adj.filePath(), 120, 90, true, true));
                 thumb.setFitWidth(120); thumb.setFitHeight(90);
                 box.getChildren().add(thumb);
             } catch (Exception ignored) {}
         }
-        if (adj.getDescripcion() != null && !adj.getDescripcion().isBlank()) {
-            Label d = new Label(adj.getDescripcion());
+        if (adj.descripcion() != null && !adj.descripcion().isBlank()) {
+            Label d = new Label(adj.descripcion());
             d.setStyle("-fx-text-fill:#c0c0d0; -fx-font-size:10px; -fx-wrap-text:true;");
             d.setMaxWidth(120); d.setWrapText(true);
             box.getChildren().add(d);
         }
-        if (adj.getLugar() != null && !adj.getLugar().isBlank()) {
-            box.getChildren().add(miniLabel("\uD83D\uDCCD " + adj.getLugar()));
+        if (adj.lugar() != null && !adj.lugar().isBlank()) {
+            box.getChildren().add(miniLabel("\uD83D\uDCCD " + adj.lugar()));
         }
-        if (adj.getFechaCaptura() != null) {
+        if (adj.fechaCaptura() != null) {
             box.getChildren().add(miniLabel("\uD83D\uDCC5 " +
-                adj.getFechaCaptura().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+                adj.fechaCaptura().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
         }
         return box;
     }
@@ -324,16 +310,14 @@ public class MainController {
         List<Long> etiquetaIds = new ArrayList<>();
         etiquetasTreeView.getSelectionModel().getSelectedItems().forEach(item -> {
             if (item != null && item.getValue() != null)
-                etiquetaIds.add(item.getValue().getId());
+                etiquetaIds.add(item.getValue().id());
         });
 
-        SearchCriteriaDTO criteria = SearchCriteriaDTO.builder()
-            .texto(searchField.getText())
-            .etiquetaIds(etiquetaIds.isEmpty() ? null : etiquetaIds)
-            .operador(radioOr.isSelected() ? SearchOperator.OR : SearchOperator.AND)
-            .build();
-
-        List<Contacto> resultados = contactoService.search(criteria);
+        List<DesktopContactoDto> resultados = desktopCrm.searchContacts(
+            searchField.getText(),
+            etiquetaIds.isEmpty() ? null : etiquetaIds,
+            radioOr.isSelected() ? "OR" : "AND"
+        );
         contactosListView.getItems().setAll(resultados);
         lblContadorContactos.setText(resultados.size() + " contacto" + (resultados.size() != 1 ? "s" : ""));
     }
@@ -344,7 +328,7 @@ public class MainController {
         abrirFormularioContacto(contactoActual);
     }
 
-    private void abrirFormularioContacto(Contacto contacto) {
+    private void abrirFormularioContacto(DesktopContactoDto contacto) {
         try {
             SpringFXMLLoader.LoadResult<ContactoFormController> result =
                 springFXMLLoader.loadWithController(FxmlView.CONTACTO_FORM.getFxmlPath());
@@ -353,7 +337,7 @@ public class MainController {
             ctrl.setOnSuccess(() -> Platform.runLater(() -> {
                 cargarContactos();
                 if (contacto != null) {
-                    mostrarExpediente(contactoService.loadFull(contacto.getId()));
+                    mostrarExpediente(desktopCrm.loadContact(contacto.id()));
                 }
             }));
             Stage modal = new Stage();
@@ -374,11 +358,11 @@ public class MainController {
     @FXML public void handleEliminarContacto() {
         if (contactoActual == null) { aviso("Selecciona un contacto primero."); return; }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-            "¿Eliminar a " + contactoActual.getNombre() + "? Se eliminará todo su expediente.");
+            "¿Eliminar a " + contactoActual.nombre() + "? Se eliminará todo su expediente.");
         confirm.setHeaderText(null);
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
-                contactoService.delete(contactoActual.getId());
+                desktopCrm.deleteContact(contactoActual.id());
                 contactoActual = null;
                 ocultarExpediente();
                 cargarContactos();
@@ -396,7 +380,7 @@ public class MainController {
 
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.setTitle("Agregar Nota");
-        dlg.setHeaderText("Nueva nota para " + contactoActual.getNombre());
+        dlg.setHeaderText("Nueva nota para " + contactoActual.nombre());
         dlg.initOwner(stageManager.getPrimaryStage());
         ButtonType guardar = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
         dlg.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
@@ -415,8 +399,8 @@ public class MainController {
             if (res == guardar) {
                 String t = titulo.getText().isBlank() ? "Nota" : titulo.getText();
                 String html = "<p>" + cuerpo.getText().replace("\n","<br/>") + "</p>";
-                timelineService.addNota(contactoActual.getId(), t, html);
-                mostrarExpediente(contactoActual);
+                desktopCrm.addNote(contactoActual.id(), t, html);
+                mostrarExpediente(desktopCrm.loadContact(contactoActual.id()));
             }
         });
     }
@@ -431,19 +415,19 @@ public class MainController {
         List<java.io.File> files = fc.showOpenMultipleDialog(stageManager.getPrimaryStage());
         if (files == null || files.isEmpty()) return;
 
-        List<MediaAdjunto> adjuntos = new ArrayList<>();
+        List<DesktopSaveMediaCommand> adjuntos = new ArrayList<>();
         for (java.io.File file : files) {
-            MediaAdjunto adj = pedirMetadatos(file);
+            DesktopSaveMediaCommand adj = pedirMetadatos(file);
             if (adj != null) adjuntos.add(adj);
         }
         if (!adjuntos.isEmpty()) {
-            timelineService.addMedia(contactoActual.getId(),
+            desktopCrm.addMedia(contactoActual.id(),
                 "Galería (" + adjuntos.size() + " foto(s))", adjuntos);
-            mostrarExpediente(contactoActual);
+            mostrarExpediente(desktopCrm.loadContact(contactoActual.id()));
         }
     }
 
-    private MediaAdjunto pedirMetadatos(java.io.File file) {
+    private DesktopSaveMediaCommand pedirMetadatos(java.io.File file) {
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.setTitle("Metadatos: " + file.getName());
         dlg.initOwner(stageManager.getPrimaryStage());
@@ -462,14 +446,14 @@ public class MainController {
 
         var res = dlg.showAndWait();
         if (res.isPresent() && res.get() == ok) {
-            return MediaAdjunto.builder()
-                .filePath(file.getAbsolutePath())
-                .nombreArchivo(file.getName())
-                .descripcion(desc.getText())
-                .lugar(lugar.getText())
-                .fechaCaptura(dp.getValue())
-                .tipoMime(mime(file.getName()))
-                .build();
+            return new DesktopSaveMediaCommand(
+                file.getAbsolutePath(),
+                file.getName(),
+                desc.getText(),
+                lugar.getText(),
+                dp.getValue(),
+                mime(file.getName())
+            );
         }
         return null;
     }
@@ -478,12 +462,12 @@ public class MainController {
         if (contactoActual == null) { aviso("Selecciona un contacto primero."); return; }
         FileChooser fc = new FileChooser();
         fc.setTitle("Guardar PDF");
-        fc.setInitialFileName(contactoActual.getNombre().replaceAll("\\s+","_") + "_expediente.pdf");
+        fc.setInitialFileName(contactoActual.nombre().replaceAll("\\s+","_") + "_expediente.pdf");
         fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF","*.pdf"));
         java.io.File file = fc.showSaveDialog(stageManager.getPrimaryStage());
         if (file == null) return;
         try {
-            byte[] pdf = exportImportService.exportContactoToPdf(contactoActual.getId());
+            byte[] pdf = desktopCrm.exportContactToPdf(contactoActual.id());
             Files.write(file.toPath(), pdf);
             info("PDF guardado en:\n" + file.getAbsolutePath());
         } catch (Exception e) { error(e.getMessage()); }
@@ -497,7 +481,7 @@ public class MainController {
         java.io.File file = fc.showSaveDialog(stageManager.getPrimaryStage());
         if (file == null) return;
         try {
-            Files.write(file.toPath(), exportImportService.generarPlantillaExcel());
+            Files.write(file.toPath(), desktopCrm.generateExcelTemplate());
             info("Plantilla guardada en:\n" + file.getAbsolutePath());
         } catch (Exception e) { error(e.getMessage()); }
     }
@@ -509,7 +493,7 @@ public class MainController {
         java.io.File file = fc.showOpenDialog(stageManager.getPrimaryStage());
         if (file == null) return;
         try (InputStream is = new FileInputStream(file)) {
-            var result = exportImportService.importarDesdeExcel(is);
+            var result = desktopCrm.importFromExcel(is);
             cargarContactos();
             String msg = result.getResumen();
             if (!result.getMensajesError().isEmpty())
@@ -518,8 +502,8 @@ public class MainController {
         } catch (Exception e) { error(e.getMessage()); }
     }
 
-    private void handleEditarRecord(TimelineRecord record) {
-        if (record.getTipo() != TimelineRecordType.NOTA) {
+    private void handleEditarRecord(DesktopTimelineRecordDto record) {
+        if (!"NOTA".equals(record.tipo())) {
             aviso("Solo se pueden editar notas de texto.");
             return;
         }
@@ -530,31 +514,31 @@ public class MainController {
         dlg.getDialogPane().getButtonTypes().addAll(guardar, ButtonType.CANCEL);
 
         VBox content = new VBox(10); content.setPadding(new Insets(15)); content.setPrefWidth(520);
-        TextField titulo = new TextField(record.getTitulo());
+        TextField titulo = new TextField(record.titulo());
         TextArea cuerpo  = new TextArea();
         cuerpo.setWrapText(true); cuerpo.setPrefHeight(200);
-        if (record.getContenidoHtml() != null)
-            cuerpo.setText(record.getContenidoHtml().replaceAll("<[^>]+>","").trim());
+        if (record.contenidoHtml() != null)
+            cuerpo.setText(record.contenidoHtml().replaceAll("<[^>]+>","").trim());
         content.getChildren().addAll(new Label("Título:"), titulo, new Label("Contenido:"), cuerpo);
         dlg.getDialogPane().setContent(content);
 
         dlg.showAndWait().ifPresent(res -> {
             if (res == guardar) {
-                timelineService.updateNota(record.getId(), titulo.getText(),
+                desktopCrm.updateNote(record.id(), titulo.getText(),
                     "<p>" + cuerpo.getText().replace("\n","<br/>") + "</p>");
-                mostrarExpediente(contactoActual);
+                mostrarExpediente(desktopCrm.loadContact(contactoActual.id()));
             }
         });
     }
 
-    private void handleEliminarRecord(TimelineRecord record) {
+    private void handleEliminarRecord(DesktopTimelineRecordDto record) {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-            "¿Eliminar '" + record.getTitulo() + "'?");
+            "¿Eliminar '" + record.titulo() + "'?");
         confirm.setHeaderText(null);
         confirm.showAndWait().ifPresent(res -> {
             if (res == ButtonType.OK) {
-                timelineService.deleteRecord(record.getId());
-                mostrarExpediente(contactoActual);
+                desktopCrm.deleteTimelineRecord(record.id());
+                mostrarExpediente(desktopCrm.loadContact(contactoActual.id()));
             }
         });
     }
